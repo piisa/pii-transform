@@ -1,0 +1,41 @@
+format: piisa:src-document:v1
+header:
+  document:
+    type: table
+    origin: csv
+    id: 00000-11111
+  column:
+    name:
+    - Date
+    - Name
+    - Credit Card
+    - Currency
+    - Amount
+    - Description
+chunks:
+- id: R1
+  data:
+  - '2021-03-01'
+  - John Smith
+  - 4273 9666 4581 5642
+  - USD
+  - '12.39'
+  - 'Our Iceberg Is Melting: Changing and Succeeding Under Any Conditions'
+- id: R2
+  data:
+  - '2022-09-10'
+  - Erik Jonsk
+  - 4273 9666 4581 5642
+  - EUR
+  - '11.99'
+  - Bedtime Originals Choo Choo Express Plush Elephant - Humphrey
+- id: R3
+  data:
+  - '2022-09-11'
+  - John Smith
+  - 4273 9666 4581 5642
+  - USD
+  - '339.99'
+  - Robot Vacuum Mary, user@gmail.com, Nobuk Robotic Vacuum Cleaner and Mop, 5000Pa Suction, Intelligent
+    AI Mapping, Virtual Walls, Ideal for Pets Hair, Self-Charging, Carpets, Hard Floors,
+    Tile, Wi-Fi, App Control
