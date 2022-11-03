@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "date": "2000-01-01T00:00:00+00:00",
+    "format": "piisa:pii-collection:v1",
+    "detectors": {
+      "1": {
+        "name": "PII Mock detector",
+        "version": "0.1.0",
+        "source": "PIISA"
+      }
+    }
+  },
+  "pii_list": [
+    {
+      "type": "CREDIT_CARD",
+      "value": "4273 9666 4581 5642",
+      "chunkid": "R1.3",
+      "subtype": "standard credit card",
+      "lang": "en",
+      "docid": "00000-11111",
+      "start": 0,
+      "end": 19
+    },
+    {
+      "type": "CREDIT_CARD",
+      "value": "4273 9666 4581 5642",
+      "chunkid": "R2.3",
+      "subtype": "standard credit card",
+      "lang": "en",
+      "docid": "00000-11111",
+      "start": 0,
+      "end": 19
+    },
+    {
+      "type": "CREDIT_CARD",
+      "value": "4273 9666 4581 5642",
+      "chunkid": "R3.3",
+      "subtype": "standard credit card",
+      "lang": "en",
+      "docid": "00000-11111",
+      "start": 0,
+      "end": 19
+    },
+    {
+      "type": "EMAIL_ADDRESS",
+      "value": "user@gmail.com",
+      "chunkid": "R3.6",
+      "docid": "00000-11111",
+      "start": 19,
+      "end": 28
+    }
+  ]
+}

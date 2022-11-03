@@ -1,0 +1,22 @@
+{
+  "EMAIL_ADDRESS": [
+    "redacted.email@gmail.com",
+    "redacted.email@hotmail.com",
+    "redacted.email@outlook.com",
+    "redacted.email@aol.com",
+    "redacted.email@yahoo.com"
+  ],
+  "CREDIT_CARD": [
+    "0123 0123 0123 0123",
+    "9999 9999 9999 9999",
+    "0000 0000 0000 0000"
+  ],
+  "PERSON": {
+    "en": {
+      "any": ["John Doe", "Jane Doe"],
+      "gb": "Joe Bloggs"
+    },
+    "es": ["Fulano Pérez", "Mengano de Tal", "Zutano"],
+    "de": ["Max Mustermann", "Erika Mustermann", "Otto Normalverbraucher"]
+  }
+}
