@@ -13,39 +13,38 @@ Properties are:
 """
 
 from pathlib import Path
-import json
 from functools import lru_cache
 from collections import defaultdict
 
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 
 from pii_data.types import PiiEntity
+from pii_data.helper.config import load_single_config
 from pii_data.helper.exception import FileException
-
+from .. import defs
 
 # How many entities to keep in cache to be able to reassign the same value
 DEFAULT_CACHE_SIZE = 200
 
+# Default filename containing placeholder values
+PH_FILENAME = "placeholder.json"
+
 
 class PlaceholderValue:
 
-    def __init__(self, file: str = None, cache_size: int = None):
+    def __init__(self, config: Union[Dict, str] = None, cache_size: int = None):
         """
-         :param file: JSON file containing placeholder values
+         :param config: configuration to use
          :param cache_size: size of the LRU cache used to maintain consistency
            in assignments
         """
-
-        # Get the file with placeholder values
-        if file is None:
-            file = Path(__file__).parents[1] / "resources" / "placeholder.json"
-        self._phfile = file
-        with open(self._phfile, encoding="utf-8") as f:
-            try:
-                self._values = json.load(f)
-            except json.JSONDecodeError as e:
-                raise FileException("cannot read JSON file {}: {}",
-                                    self._phfile, e) from e
+        # Get the placeholder config
+        base = Path(__file__).parents[1] / "resources" / PH_FILENAME
+        config = load_single_config(base, defs.FMT_CONFIG_PLACEHOLDER, config)
+        try:
+            self._values = config["placeholder_values"]
+        except KeyError as e:
+            raise FileException("cannot fetch placeholder info from config") from e
 
         # Prepare the cache
         if cache_size is None:
@@ -55,7 +54,7 @@ class PlaceholderValue:
 
 
     def __repr__(self) -> str:
-        return f"<PlaceholderValue: {self._phfile.name}>"
+        return f"<PlaceholderValue: #{len(self._values)}>"
 
 
     def _select_value(self, pii: PiiEntity) -> Union[str, List[str]]:
@@ -70,10 +69,10 @@ class PlaceholderValue:
         if isinstance(elem, (list, str)):
             return elem
 
-        lang = elem.get(fields.get("lang")) or elem.get("any")
+        lang = elem.get(pii.info.lang) or elem.get("any")
         if not lang:
             return pii_type
-        country = lang.get(fields.get("country")) or lang.get("any")
+        country = lang.get(pii.info.country) or lang.get("any")
         return country or pii_type
 
 
@@ -82,7 +81,7 @@ class PlaceholderValue:
         Rotate the value to use from the list, keeping consistency in
         assignments to the same PiiEntity values
 
-        Note: "value" is here only to trigger the LRU cache retrieval
+        Note: "value" is used as argument only to trigger LRU cache retrieval
         """
         try:
             return choices[self._index[key]]
@@ -102,6 +101,6 @@ class PlaceholderValue:
             return value
 
         # If it's a list, choose the value to use
-        fields = pii.fields
-        key = '/'.join(str(fields.get(e)) for e in ("type", "lang", "country"))
-        return self._cache(key, fields["value"], tuple(value))
+        info = pii.info
+        key = '/'.join(map(str, (info.pii, info.lang, info.country)))
+        return self._cache(key, pii.fields["value"], tuple(value))

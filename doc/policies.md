@@ -4,7 +4,6 @@ This package defines the following policies for the transformation of PII
 instances:
  * **passthrough**: the value of the PII instance is left as is
  * **redact**: all pii instances are replaced by a `<PII>` generic string
- * **hash**: an hexadecimal string replaces the PII value
  * **label**: a PII instance is replaced by its PII _type_, e.g. `<EMAIL_ADDRESS>`
  * **placeholder**: replace with a prototypical value, see below
  * **hash**: replace by a hash made from the entity value plus a key

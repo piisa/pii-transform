@@ -3,17 +3,14 @@ Test the PiiSubstitutionValue class
 """
 
 from pathlib import Path
-from os import unlink
 
 import tempfile
 import pytest
 
 from typing import Dict
 
-from pii_data.helper.exception import InvArgException, UnimplementedException
-from pii_data.types import PiiEnum, PiiEntity
-from pii_data.types.localdoc import BaseLocalSrcDocument, LocalSrcDocumentFile
 from pii_data.types.piicollection import PiiCollectionLoader
+from pii_data.types.doc.localdoc import BaseLocalSrcDocument, LocalSrcDocumentFile
 from pii_data.helper.io import load_yaml
 
 import pii_transform.api.transform as mod

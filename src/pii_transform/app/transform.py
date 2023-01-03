@@ -4,12 +4,11 @@ Command-line script to process data and perform PII substitutions
 
 import sys
 import argparse
-import json
 
-from typing import List, Dict
+from typing import List
 
-from pii_data.types.localdoc import LocalSrcDocumentFile
 from pii_data.types.piicollection import PiiCollectionLoader
+from pii_data.types.doc import LocalSrcDocumentFile
 
 from .. import VERSION
 from ..helper.substitution import POLICIES
@@ -17,7 +16,9 @@ from ..api import PiiTransformer
 
 
 class Log:
-
+    """
+    A very simple class to conditionally log messages to console_scripts
+    """
     def __init__(self, verbose: bool):
         self._v = verbose
 
@@ -26,23 +27,15 @@ class Log:
             print(msg, *args, file=sys.stderr)
 
 
-def get_policy(policy_file: str, log: Log) -> Dict:
-    if not policy_file:
-        return None
-    log(". Loading policy file:", policy_file)
-    with open(policy_file, encoding="utf-8") as f:
-        return json.load(f)
-
-
 def process(args: argparse.Namespace):
 
     log = Log(args.verbose)
 
     if args.hash_key and args.default_policy == "hash":
         args.default_policy = {"name": "hash", "key": args.hash_key}
-    policy = get_policy(args.policy_file, log)
-    trf = PiiTransformer(default_policy=args.default_policy,
-                         policy=policy, placeholder_file=args.placeholder_file)
+    if args.config:
+        log(". Using config:", args.config)
+    trf = PiiTransformer(default_policy=args.default_policy, config=args.config)
 
     log(". Loading document:", args.infile)
     doc = LocalSrcDocumentFile(args.infile)
@@ -69,10 +62,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
     g2 = parser.add_argument_group("Processing options")
     g2.add_argument("--default-policy", choices=POLICIES,
                     help="Apply a default policy to all entities")
-    g2.add_argument("--policy-file",
-                    help="JSON file with policies to be applied")
-    g2.add_argument("--placeholder-file",
-                    help="JSON file with substitution values for the placeholder policy")
+    g2.add_argument("--config", nargs="+",
+                    help="Configuration file for policies and/or placeholder")
     g2.add_argument("--hash-key",
                     help="key value for the hash policy")
 

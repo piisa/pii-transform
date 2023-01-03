@@ -5,6 +5,7 @@ from typing import Union, Dict
 from pii_data.helper.exception import InvArgException, UnimplementedException
 from pii_data.types import PiiEnum, PiiEntity
 
+from .. import defs
 from .placeholder import PlaceholderValue
 
 
@@ -65,23 +66,23 @@ def policy_target(target: Union[str, PiiEnum]) -> str:
 
 class PiiSubstitutionValue:
 
-    def __init__(self, default_policy: str = None, policy: Dict = None,
-                 placeholder_file: str = None):
+    def __init__(self, default_policy: str = None, config: Dict = None):
         """
          :param policy: a default policy to apply to all entities that do
             not have a specific policy
          :param policy: a detailed policy per entity type
-         :param placeholder_file: a file with values for the placeholder
-            policy
+         :param placeholder: values for the placeholder policy
          """
-        self._phfile = placeholder_file
+        self._config = config
         self._ph = None
 
         # Build the policy assigner
         self._assign = {"default": self._policy(default_policy or DEFAULT_POLICY)}
+        policy = config.get(defs.FMT_CONFIG_POLICY) if config else None
         if policy is not None:
             for p, v in policy.items():
                 self._assign[policy_target(p)] = self._policy(v)
+
 
     def __repr__(self) -> str:
         return f"<PiiSubstitutionValue #{len(self._assign)}>"
@@ -108,7 +109,7 @@ class PiiSubstitutionValue:
         # Return the transformation for this policy
         if pname == "placeholder":
             if self._ph is None:
-                self._ph = PlaceholderValue(self._phfile)
+                self._ph = PlaceholderValue(self._config)
             return self._ph
         elif pname == "hash":
             try:
