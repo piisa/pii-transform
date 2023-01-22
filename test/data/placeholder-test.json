@@ -1,0 +1,21 @@
+{
+  "format": "piisa:config:pii-transform:placeholder:v1",
+  "placeholder_values": {
+    "CREDIT_CARD": [
+      "0123 0123 0123 0123",
+      "9999 9999 9999 9999",
+      "0000 0000 0000 0000"
+    ],
+    "BLOCKCHAIN_ADDRESS": "abc",
+    "PERSON": {
+      "en": {
+	"any": ["John Doe", "Jane Doe"],
+	"gb": "Joe Bloggs"
+      },
+      "es": {
+	"any": ["Fulano Pérez", "Mengano de Tal", "Zutano"]
+      },
+      "de": ["Max Mustermann", "Erika Mustermann", "Otto Normalverbraucher"]
+    }
+  }
+}
