@@ -21,6 +21,7 @@ from typing import Union, List, Tuple, Dict
 from pii_data.types import PiiEntity
 from pii_data.helper.config import load_single_config
 from pii_data.helper.exception import FileException
+
 from .. import defs
 
 # How many entities to keep in cache to be able to reassign the same value

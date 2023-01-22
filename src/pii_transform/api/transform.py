@@ -2,9 +2,7 @@
 Transform documents by replacing PII instances according to a policy
 """
 
-from operator import attrgetter
-
-from typing import Iterable, Dict, List
+from typing import Dict
 
 from pii_data.types import PiiCollection
 from pii_data.types.doc import SrcDocument, DocumentChunk, LocalSrcDocument
