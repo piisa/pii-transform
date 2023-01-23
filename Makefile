@@ -5,6 +5,7 @@
 #  make install   -> install the package in a virtualenv
 #  make uninstall -> uninstall the package from the virtualenv
 
+
 # Package name
 NAME := pii-transform
 
@@ -53,7 +54,6 @@ backup: version
 
 TEST ?= test/unit
 
-
 venv: $(VENV)
 
 pytest: $(VENV)/bin/pytest
@@ -81,19 +81,19 @@ $(VENV):
 	$@/bin/pip install --upgrade pip
 	$@/bin/pip install wheel
 
+$(VENV)/bin/pytest: $(VENV)
+	$(VENV)/bin/pip install pytest
+
 install-dependencies: $(VENV)
 	$(VENV)/bin/pip install -r requirements.txt
 
-install: $(PKGFILE) venv
+install: $(PKGFILE) $(VENV)
 	$(VENV)/bin/pip install $(PKGFILE)
 
-uninstall:
+uninstall: $(VENV)
 	$(VENV)/bin/pip uninstall -y $(NAME)
 
 reinstall: uninstall clean pkg install
-
-$(VENV)/bin/pytest: venv
-	$(VENV)/bin/pip install pytest
 
 
 # -----------------------------------------------------------------------

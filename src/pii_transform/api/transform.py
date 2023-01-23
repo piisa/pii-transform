@@ -31,6 +31,22 @@ class PiiTransformer:
         return "<PiiTransformer>"
 
 
+    def transform_chunk(self, chunk: DocumentChunk, piic: PiiCollection):
+        """
+        Perform a transformation on a DocumentChunk
+         :param chunk: original chunk
+         :param piic: a collection providing the piic for this chunk
+        """
+        # Construct the new content for the chunk
+        output = []
+        pos = 0
+        for pii in piic:
+            output += [chunk.data[pos:pii.pos], self.subst(pii)]
+            pos = pii.pos + len(pii)
+        chunk_data = "".join(output) + chunk.data[pos:]
+        return DocumentChunk(chunk.id, chunk_data, chunk.context)
+
+
     def __call__(self, document: SrcDocument,
                  piic: PiiCollection) -> SrcDocument:
         """
@@ -50,17 +66,7 @@ class PiiTransformer:
 
         # Substitute all PII instances in all chunks
         for chunk in document:
-
-            # Construct the new content for the chunk
-            output = []
-            pos = 0
-            for pii in pii_it(chunk.id):
-                output += [chunk.data[pos:pii.pos], self.subst(pii)]
-                pos = pii.pos + len(pii)
-            chunk_data = "".join(output) + chunk.data[pos:]
-
-            # Add the chunk to the output document
-            newchunk = DocumentChunk(chunk.id, chunk_data, chunk.context)
+            newchunk = self.transform_chunk(chunk, pii_it(chunk.id))
             out.add_chunk(newchunk)
 
         return out

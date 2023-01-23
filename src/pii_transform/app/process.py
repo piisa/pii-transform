@@ -7,83 +7,10 @@ import argparse
 
 from typing import List
 
-from pii_data.helper.io import openfile
-from pii_data.helper.config import load_config
-from pii_data.helper.exception import InvArgException
-try:
-    from pii_preprocess.loader import DocumentLoader
-    from pii_extract.api import PiiProcessor
-    from pii_extract.api.file import piic_format, print_stats, print_tasks
-    MISSING = None
-except ImportError as e:
-    MISSING = str(e)
-
 from .. import VERSION
-from ..api import PiiTransformer
 from ..helper.substitution import POLICIES
-from .transform import Log
 
-
-def process(args: argparse.Namespace):
-    """
-    The main processing function
-    """
-
-    log = Log(args.verbose > 0)
-
-    # Load a configuration, if given
-    if args.config:
-        log(". Loading config:", args.config)
-        config = load_config(args.config)
-    else:
-        config = {}
-
-    # Load the document to process
-    log(". Loading document:", args.infile)
-    loader = DocumentLoader(config=config)
-    doc = loader.load(args.infile)
-
-    # Select working language: from the document or from the command line
-    meta = doc.metadata
-    lang = meta.get("main_lang") or meta.get("lang") or args.lang
-    if not lang:
-        raise InvArgException("no language defined in options or document")
-
-    # Create a PiiProcessor object for PII detection
-    log(". Loading task processor")
-    proc = PiiProcessor(debug=args.verbose > 1, config=config)
-
-    # Build the task objects
-    log(". Building task objects")
-    proc.build_tasks(lang, args.country, pii=args.tasks)
-    if args.show_tasks:
-        print_tasks(lang, proc, sys.stdout)
-
-    # Process the file
-    log(". Detecting PII instances")
-    piic = proc(doc, chunk_context=args.chunk_context)
-
-    # Show statistics
-    if args.show_stats:
-        print_stats(proc.get_stats(), sys.stdout)
-
-    # Dump detection results to a file
-    if args.save_pii:
-        log(". Saving detected PII to:", args.save_pii)
-        fmt = piic_format(args.save_pii)
-        with openfile(args.save_pii, "wt") as fout:
-            piic.dump(fout, format=fmt)
-
-    # Transform the document
-    log(". Transforming PII instances")
-    if args.hash_key and args.default_policy == "hash":
-        args.default_policy = {"name": "hash", "key": args.hash_key}
-    trf = PiiTransformer(default_policy=args.default_policy, config=config)
-    out = trf(doc, piic)
-
-    # Save the transformed document
-    log(". Dumping to:", args.outfile)
-    out.dump(args.outfile)
+from ..api.e2e import process_document, MISSING_LIBS
 
 
 # -------------------------------------------------------------------------
@@ -133,17 +60,22 @@ def parse_args(args: List[str]) -> argparse.Namespace:
 
 
 def main(args: List[str] = None):
-    if MISSING is not None:
-        print("Error: missing package dependency:", MISSING)
+    if MISSING_LIBS is not None:
+        print("Error: missing package dependency:", MISSING_LIBS)
         sys.exit(1)
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
+    vararg = vars(args)
+    reraise = vararg.pop("reraise")
     try:
-        process(args)
+        infile = vararg.pop("infile")
+        outfile = vararg.pop("outfile")
+        piifile = vararg.pop("save_pii")
+        process_document(infile, outfile, piifile=piifile, **vararg)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
-        if args.reraise:
+        if reraise:
             raise
         else:
             sys.exit(1)
