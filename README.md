@@ -20,11 +20,18 @@ The package provides two console scripts:
     - transforms the detected PII instances (according to the indicated policy)
 	  and writes out the transformed documennt
 	  
+	  
 Note that `pii-process` will need additional packages to be present:
  * `pii-preprocess`
  * `pii-extract-base`, together with any available detection plugins, e.g.
    `pii-extract-plg-regex`
 
 
+## API
+
+The same functionality provided by the command-line scripts can also be
+accessed via a [Python API]
+
 [transformation policies]: doc/policies.md
+[Python API]: doc/api.md
 

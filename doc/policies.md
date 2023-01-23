@@ -15,12 +15,12 @@ instances:
 
 ## hash
 
-The hash policy substitutes the value of a II Entity by a hash constructed
+The hash policy substitutes the value of a PII Entity by a hash constructed
 from concatenating a key + entity type + entity value. Therefore, if using the
-same key an given entity will always produce the same hash.
+same key a given entity will always produce the same hash.
 
-The output is in the form of a hexadecimal string, with spaced dashes for
-easier inspection.
+The output is in the form of a hexadecimal string, with dashes for easier
+inspection.
 
 This policy has one required and one optional parameter:
  * `key`: _required_, this is a string that will be added to the PII value to
@@ -63,7 +63,7 @@ placeholder file].
 
 ## custom
 
-This policy needs an additional `template` parameter, which contains an string
+This policy needs an additional `template` parameter, which contains a string
 that will act as a template to render the replacement.
 
 The template can contain fields of the PII Instance, enclosed in braces. For

@@ -80,4 +80,3 @@ def test40_process_table():
     got = save_load(result)
     exp = load_yaml(DATADIR / "minidoc-example-table-repl.yaml")
     assert exp == got
-    
