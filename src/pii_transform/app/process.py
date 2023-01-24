@@ -10,7 +10,7 @@ from typing import List
 from .. import VERSION
 from ..helper.substitution import POLICIES
 
-from ..api.e2e import process_document, MISSING_LIBS
+from ..api.e2e import process_document, format_policy, MISSING_LIBS
 
 
 # -------------------------------------------------------------------------
@@ -45,8 +45,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
     g2 = parser.add_argument_group("Transforming options")
     g2.add_argument("--default-policy", choices=POLICIES,
                     help="Apply a default policy to all entities")
-    g2.add_argument("--hash-key",
-                    help="key value for the hash policy")
+    g2.add_argument("--policy-param",
+                    help="policy specific parameter (e.g. hash key, template)")
 
     g3 = parser.add_argument_group("Other")
     g3.add_argument("--verbose","-v", type=int, default=1,
@@ -65,14 +65,18 @@ def main(args: List[str] = None):
         sys.exit(1)
     if args is None:
         args = sys.argv[1:]
+
     args = parse_args(args)
-    vararg = vars(args)
-    reraise = vararg.pop("reraise")
+    kw = vars(args)
+    reraise = kw.pop("reraise")
+
     try:
-        infile = vararg.pop("infile")
-        outfile = vararg.pop("outfile")
-        piifile = vararg.pop("save_pii")
-        process_document(infile, outfile, piifile=piifile, **vararg)
+        infile = kw.pop("infile")
+        outfile = kw.pop("outfile")
+        piifile = kw.pop("save_pii")
+        defp = format_policy(kw.pop("default_policy"), kw.pop("policy_param"))
+        process_document(infile, outfile, piifile=piifile, default_policy=defp,
+                         **kw)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         if reraise:

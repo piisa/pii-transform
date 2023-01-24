@@ -18,24 +18,24 @@ def test10_constructor():
     Test constructing the object with default file
     """
     m = mod.PlaceholderValue()
-    assert str(m) == "<PlaceholderValue: #3>"
+    assert str(m) == "<PlaceholderValue: #5>"
 
 
 def test11_constructor_file():
     """
-    Test constructing the object with specific file
+    Test constructing the object with specific config file
     """
     m = mod.PlaceholderValue(config=datafile("placeholder-test.json"))
-    assert str(m) == "<PlaceholderValue: #4>"
+    assert str(m) == "<PlaceholderValue: #6>"
 
 
 def test12_constructor_data():
     """
-    Test constructing the object with specific file
+    Test constructing the object with specific config data
     """
     config = load_config(datafile("placeholder-test.json"))
     m = mod.PlaceholderValue(config=config)
-    assert str(m) == "<PlaceholderValue: #4>"
+    assert str(m) == "<PlaceholderValue: #6>"
 
 
 def test20_value():

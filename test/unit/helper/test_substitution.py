@@ -94,6 +94,20 @@ def test140_custom():
         assert m(pii) == f"{p.name}=1234 5678 (43)"
 
 
+def test141_custom_missing():
+    """
+    Test constructing the object, set custom policy, missing fields
+    """
+    policy = {"name": "custom",
+              "template": "{type}={value} ({chunkid}) pos={start} <{country}>"}
+    m = mod.PiiSubstitutionValue(default_policy=policy)
+
+    for n, p in enumerate((PiiEnum.CREDIT_CARD, PiiEnum.BLOCKCHAIN_ADDRESS,
+                           PiiEnum.BANK_ACCOUNT)):
+        pii = PiiEntity.build(p, "1234 5678", "43", n)
+        assert m(pii) == f"{p.name}=1234 5678 (43) pos={n} <>"
+
+
 def test150_hash():
     """
     Test constructing the object, set hash policy
