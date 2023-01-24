@@ -93,6 +93,8 @@ chain. Argument values can be:
  * filenames holding a configuration (in JSON format)
  * in-memory configurations, as a Python dictionary
 
+The constructor contains also additional arguments to select a subset of
+detection tasks to apply.
 
 
 [policy]: policies.md
