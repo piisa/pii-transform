@@ -4,7 +4,7 @@ End-to-end PII processing for documents
 
 import sys
 
-from typing import List
+from typing import List, Union, Dict
 
 from pii_data.helper.io import openfile
 from pii_data.helper.config import load_config, TYPE_CONFIG_LIST
@@ -25,12 +25,29 @@ except ImportError as e:
     TYPE_TASKENUM = List
 
 
+def format_policy(name: str, param: str = None) -> Dict:
+    """
+    Format a policy
+      :param name: policy name
+      :param param: policy parameter, for policies that require it
+    """
+    if name == "hash":
+        if param is None:
+            raise InvArgException("hash policy needs a key")
+        return {"name": "hash", "key": param}
+    elif name == "custom":
+        if param is None:
+            raise InvArgException("custom policy needs a template")
+        return {"name": "custom", "template": param}
+    else:
+        return name
+
 
 def process_document(infile: str, outfile: str, piifile: str = None,
                      config: TYPE_CONFIG_LIST = None,
                      lang: str = None, country: List[str] = None,
                      tasks: TYPE_TASKENUM = None, chunk_context: bool = False,
-                     default_policy: str = None, hash_key: str = None,
+                     default_policy: Union[str, Dict] = None,
                      verbose: int = 0, show_tasks: bool = False,
                      show_stats: bool = False) -> int:
     """
@@ -48,14 +65,12 @@ def process_document(infile: str, outfile: str, piifile: str = None,
      :param task: restrict to an specific set of detection tasks
      :param chunk_context: add contexts to chunks when detecting
      :param default_policy: default transform policy
-     :param hash_key: for "hash" policy, the hash key to use
      :param verbose: verbosity level, if > 0 print out progress messages
      :param show_tasks: print out the list of built tasks
      :param show_stats: print out statistics on detected PII
     """
     if MISSING_LIBS is not None:
         raise ProcException("Error: missing package dependency: {}", MISSING_LIBS)
-
     log = PiiLogger(__name__, verbose > 0)
 
     # Load a configuration, if given
@@ -64,6 +79,9 @@ def process_document(infile: str, outfile: str, piifile: str = None,
         config = load_config(config)
     else:
         config = {}
+
+    # Build transform object
+    trf = PiiTransformer(default_policy=default_policy, config=config)
 
     # Load the document to process
     log(". Loading document: %s", infile)
@@ -103,9 +121,6 @@ def process_document(infile: str, outfile: str, piifile: str = None,
 
     # Transform the document
     log(". Transforming PII instances")
-    if hash_key and default_policy == "hash":
-        default_policy = {"name": "hash", "key": hash_key}
-    trf = PiiTransformer(default_policy=default_policy, config=config)
     out = trf(doc, piic)
 
     # Save the transformed document

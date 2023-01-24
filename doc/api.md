@@ -78,8 +78,24 @@ proc = PiiTextProcessor(lang="en", default_policy="label")
 outbuf = proc(inbuf)
 ```
 
-This is a [thin wrapper] over the relevant objects in the PIISA libraries
+This is a [thin wrapper] over the relevant objects in the PIISA libraries.
+The procedure is:
+ 1. Initialize a `PiiTextProcessor` object, giving as arguments the language
+    the text will be in and the default [policy] to apply to transform the
+	PII instances found
+ 2. Call the object with a text buffer. It will detect PII instances in it
+    and apply the transformation, and will return the transformed text buffer.
+
+Additional process customization is possible by adding a `config` argument to
+the constructor. This will contain a PIISA [configuration], or a list of them,
+that will be used to modify the behaviour of one or more elements in the
+chain. Argument values can be:
+ * filenames holding a configuration (in JSON format)
+ * in-memory configurations, as a Python dictionary
+
+
 
 [policy]: policies.md
 [its implementation]: ../src/pii_transform/api/e2e/document.py
 [thin wrapper]: ../src/pii_transform/api/e2e/textchunk.py
+[configuration]: https://github.com/piisa/piisa/tree/main/docs/configuration.md

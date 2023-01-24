@@ -131,6 +131,7 @@ dmypy.json
 # backup
 *~
 \#*
+/*.tgz
 
 # Backup & old files
 *~
@@ -138,3 +139,4 @@ dmypy.json
 .\#*
 old/
 *.old
+/tmp

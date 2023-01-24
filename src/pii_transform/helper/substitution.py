@@ -63,16 +63,23 @@ def policy_target(target: Union[str, PiiEnum]) -> str:
         raise InvArgException('invalid policy target: {}', target)
 
 
+class DefaultEmpty(dict):
+    """
+    A dict that returns an emoty string on missing keys
+    """
+    def __missing__(self, key):
+        return ""
+
 
 class PiiSubstitutionValue:
 
-    def __init__(self, default_policy: str = None, config: Dict = None):
+    def __init__(self, default_policy: Union[str, Dict] = None,
+                 config: Dict = None):
         """
          :param policy: a default policy to apply to all entities that do
-            not have a specific policy
-         :param policy: a detailed policy per entity type
-         :param placeholder: values for the placeholder policy
-         """
+            not have a specific policy in the configuration
+         :param config: configuration to apply
+        """
         self._config = config
         self._ph = None
 
@@ -136,6 +143,6 @@ class PiiSubstitutionValue:
         """
         v = self._assign.get(pii.fields["type"]) or self._assign["default"]
         if isinstance(v, str):
-            return v.format(**pii.fields)
+            return v.format_map(DefaultEmpty(pii.asdict()))
         else:
             return v(pii)

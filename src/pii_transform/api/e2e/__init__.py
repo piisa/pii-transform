@@ -1,2 +1,2 @@
-from .document import process_document, MISSING_LIBS
+from .document import process_document, format_policy, MISSING_LIBS
 from .textchunk import PiiTextProcessor

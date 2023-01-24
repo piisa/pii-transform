@@ -65,6 +65,7 @@ class PlaceholderValue:
         fields = pii.fields
         pii_type = fields["type"]
         elem = self._values.get(pii_type)
+
         if not elem:
             return pii_type
         if isinstance(elem, (list, str)):
@@ -73,6 +74,9 @@ class PlaceholderValue:
         lang = elem.get(pii.info.lang) or elem.get("any")
         if not lang:
             return pii_type
+        if isinstance(lang, (list, str)):
+            return lang
+
         country = lang.get(pii.info.country) or lang.get("any")
         return country or pii_type
 

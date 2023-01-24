@@ -2,7 +2,7 @@
 Transform documents by replacing PII instances according to a policy
 """
 
-from typing import Dict
+from typing import Dict, Union
 
 from pii_data.types import PiiCollection
 from pii_data.types.doc import SrcDocument, DocumentChunk, LocalSrcDocument
@@ -16,12 +16,13 @@ from ..helper import PiiSubstitutionValue
 
 class PiiTransformer:
 
-    def __init__(self, default_policy: str = None, config: Dict = None,
-                 debug: bool = False):
+    def __init__(self, default_policy: Union[str, Dict] = None,
+                 config: Dict = None, debug: bool = False):
         """
          :param default_policy: a default policy value to apply to all entities
             that do not have a specific policy
-         :param policy: configurations for transform policy and/or placheholder
+         :param config: full policy configurations to apply
+         :param debug:
         """
         self._debug = debug
         self.subst = PiiSubstitutionValue(default_policy, config)

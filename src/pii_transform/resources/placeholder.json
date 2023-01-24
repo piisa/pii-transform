@@ -1,6 +1,8 @@
 {
   "format": "piisa:config:pii-transform:placeholder:v1",
   "placeholder_values": {
+
+
     "EMAIL_ADDRESS": [
       "redacted.email@gmail.com",
       "redacted.email@hotmail.com",
@@ -8,11 +10,42 @@
       "redacted.email@aol.com",
       "redacted.email@yahoo.com"
     ],
+
+
+    "GOV_ID": {
+      "any": "00111222",
+      "en": {
+	"us": "000-11-1234"
+      },
+      "es": {
+	"es": ["12345678Z", "11111111H"]
+      }
+    },
+
+
+    "PHONE_NUMBER": {
+      "any": "+00 0 1234 5678",
+      "en": {
+	"us": [
+	  "(000) 123-456", "(001) 123-456", "(002) 123-456", "(003) 123-456"
+	]
+      },
+      "es": {
+	"any": "00 0000 0000",
+	"es": [
+	  "999 123 456", "999 000 000", "998 123 456", "998 123 456"
+	]
+      }
+    },
+
+
     "CREDIT_CARD": [
       "0123 0123 0123 0123",
       "9999 9999 9999 9999",
       "0000 0000 0000 0000"
     ],
+
+
     "PERSON": {
       "en": {
 	"any": ["John Doe", "Jane Doe"],

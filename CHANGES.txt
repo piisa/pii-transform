@@ -1,3 +1,12 @@
+v. 0.2.1
+ * fix: policy argument passing to process_document() for policies with options
+ * fix: placeholder processing with non-country-specific options
+ * fix: substitution templates with missing fields
+ * added more placeholder values to config
+
 v. 0.2.0
  * API for end-to-end processing of raw text buffers
  * Provide a Python API function for end-to-end document processing
+
+v. 0.1.0
+ * initial version
