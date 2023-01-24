@@ -1,6 +1,7 @@
 """
 Transform documents by replacing PII instances according to a policy
 """
+from operator import attrgetter
 
 from typing import Dict, Union
 
@@ -41,7 +42,7 @@ class PiiTransformer:
         # Construct the new content for the chunk
         output = []
         pos = 0
-        for pii in piic:
+        for pii in sorted(piic, key=attrgetter("pos")):
             output += [chunk.data[pos:pii.pos], self.subst(pii)]
             pos = pii.pos + len(pii)
         chunk_data = "".join(output) + chunk.data[pos:]

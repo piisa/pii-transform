@@ -1,3 +1,6 @@
+v. 0.2.2
+ * fix: process textchunk API correctly for unordered PII collections
+ 
 v. 0.2.1
  * fix: policy argument passing to process_document() for policies with options
  * fix: placeholder processing with non-country-specific options
