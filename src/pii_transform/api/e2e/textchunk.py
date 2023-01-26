@@ -28,16 +28,13 @@ class PiiTextProcessor:
 
     def __init__(self, lang: str = "en", default_policy: str = "label",
                  config: TYPE_CONFIG_LIST = None, country: List[str] = None,
-                 tasks: TYPE_TASKENUM = None, chunk_context: bool = False,
-                 debug: bool = False):
+                 tasks: TYPE_TASKENUM = None, debug: bool = False):
         """
          :param lang: language that text buffers will be in
          :param default_policy: default transformation policy to use
          :param config: configuration(s) to load, in addition to the defaults
          :param country: country(es) to restrict task for
          :param tasks: restrict to an specific set of detection tasks
-         :param chunk_context: if a processing chunk contains context info,
-            activate context use for detection
          :param debug: activate debug output
         """
         if MISSING is not None:
@@ -45,7 +42,6 @@ class PiiTextProcessor:
         self.config = load_config(config or [])
         self.lang = lang
         self.policy = default_policy
-        self.chunk_context = chunk_context
         self.proc = PiiProcessor(config=self.config, debug=debug)
         self.proc.build_tasks(lang=lang, country=country, pii=tasks)
         self.trf = PiiTransformer(default_policy=default_policy,
@@ -63,7 +59,7 @@ class PiiTextProcessor:
           :return: a tuple (output-chunk, collection-of-detected-pii)
         """
         piic = PiiCollectionBuilder(lang=self.lang)
-        self.proc.detect_chunk(chunk, piic, chunk_context=self.chunk_context)
+        self.proc.detect_chunk(chunk, piic)
         chunk = self.trf.transform_chunk(chunk, piic)
         return chunk, piic
 

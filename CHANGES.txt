@@ -1,3 +1,6 @@
+v. 0.2.4
+ * fix: removed bogus argument in call to detect
+
 v. 0.2.3
  * added additional constructor options for PiiTextProcessor
  * new method process() for PiiTextProcessor()
