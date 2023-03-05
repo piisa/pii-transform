@@ -7,7 +7,7 @@ instances:
  * **label**: a PII instance is replaced by its PII _type_, e.g. `<EMAIL_ADDRESS>`
  * **placeholder**: replace with a prototypical value, see below
  * **hash**: replace by a hash made from the entity value plus a key
- * **synthetic**: substitute by synthetic data **(currently not implemented)**
+ * **synthetic**: substitute by synthetic data
  * **annotate**: replace the PII instance by a `<TYPE:VALUE>` string, i.e. include
    _both_ the PII type and its value
  * **custom**: perform replacement according to a template, see below
@@ -60,6 +60,12 @@ will be used.
 If no placeholder file is indicated in the policy, the module uses a [default
 placeholder file].
 
+## synthetic
+
+This policy creates synthetic values using the [Faker] package. It will try to
+adjust the characteristics of the created value to the PII language and
+country, if possible.
+
 
 ## custom
 
@@ -75,7 +81,4 @@ will generate substitutions such as `GOV_ID=2123131331212 country=us`
 
 
 [default placeholder file]: ../src/pii_transform/resources/placeholder.json
-
-
-   
-   
+[Faker]: https://faker.readthedocs.io/en/stable/index.html

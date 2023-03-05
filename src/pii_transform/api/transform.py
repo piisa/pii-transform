@@ -8,8 +8,13 @@ from typing import Dict, Union
 from pii_data.types import PiiCollection
 from pii_data.types.doc import SrcDocument, DocumentChunk, LocalSrcDocument
 from pii_data.types.piicollection import PiiChunkIterator
+from pii_data.helper.config import load_config
 
 from ..helper import PiiSubstitutionValue
+from .. import defs
+
+# Reset all assigment caches for each new document
+DEFAULT_RESET = "document"
 
 
 # --------------------------------------------------------------------------
@@ -22,11 +27,17 @@ class PiiTransformer:
         """
          :param default_policy: a default policy value to apply to all entities
             that do not have a specific policy
-         :param config: full policy configurations to apply
-         :param debug:
+         :param config: object configuration to apply
+         :param debug: print out debug messages
         """
         self._debug = debug
-        self.subst = PiiSubstitutionValue(default_policy, config)
+        all_config = load_config(config, [defs.FMT_CONFIG_TRANSFORM,
+                                          defs.FMT_CONFIG_PLACEHOLDER])
+        config = all_config.get(defs.FMT_CONFIG_TRANSFORM) or {}
+        self._reset = config.get("reset", DEFAULT_RESET)
+        if default_policy is None:
+            default_policy = config.get("default_policy")
+        self.subst = PiiSubstitutionValue(default_policy, all_config)
 
 
     def __repr__(self) -> str:
@@ -58,6 +69,9 @@ class PiiTransformer:
          :param piic: the list of detected PII instances
          :return: a local document with all replacements done
         """
+        if self._reset == "document":
+            self.subst.reset()
+
         pii_it = PiiChunkIterator(piic)
 
         # Create the output document, and clone all its metadata
@@ -68,6 +82,8 @@ class PiiTransformer:
 
         # Substitute all PII instances in all chunks
         for chunk in document:
+            if self._reset == "chunk":
+                self.subst.reset()
             newchunk = self.transform_chunk(chunk, pii_it(chunk.id))
             out.add_chunk(newchunk)
 

@@ -1,12 +1,16 @@
+"""
+The main object performing PII value substitution
+"""
 import hashlib
 
-from typing import Union, Dict
+from typing import Union, Dict, Callable
 
 from pii_data.helper.exception import InvArgException, UnimplementedException
 from pii_data.types import PiiEnum, PiiEntity
 
 from .. import defs
 from .placeholder import PlaceholderValue
+from .synthetic import SyntheticValue
 
 
 DEFAULT_POLICY = "label"
@@ -52,6 +56,9 @@ class Hasher():
 
 
 def policy_target(target: Union[str, PiiEnum]) -> str:
+    """
+    Compose the name of a policy target
+    """
     if isinstance(target, PiiEnum):
         return target.name
     target = str(target).upper()
@@ -65,7 +72,7 @@ def policy_target(target: Union[str, PiiEnum]) -> str:
 
 class DefaultEmpty(dict):
     """
-    A dict that returns an emoty string on missing keys
+    A dict that returns an empty string on missing keys
     """
     def __missing__(self, key):
         return ""
@@ -76,16 +83,17 @@ class PiiSubstitutionValue:
     def __init__(self, default_policy: Union[str, Dict] = None,
                  config: Dict = None):
         """
-         :param policy: a default policy to apply to all entities that do
-            not have a specific policy in the configuration
+         :param default_policy: a default policy to apply to all entities that
+            do not have a specific policy in the configuration
          :param config: configuration to apply
         """
-        self._config = config
+        self._config = config or {}
         self._ph = None
 
         # Build the policy assigner
         self._assign = {"default": self._policy(default_policy or DEFAULT_POLICY)}
-        policy = config.get(defs.FMT_CONFIG_POLICY) if config else None
+        cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM) or {}
+        policy = cfg.get("policy")
         if policy is not None:
             for p, v in policy.items():
                 self._assign[policy_target(p)] = self._policy(v)
@@ -95,11 +103,12 @@ class PiiSubstitutionValue:
         return f"<PiiSubstitutionValue #{len(self._assign)}>"
 
 
-    def _policy(self, policy: Union[str, Dict]):
+    def _policy(self, policy: Union[str, Dict]) -> Callable:
         """
         Compose & return a policy process
+         :param policy: either a single policy name, or a dictionary defining
+           a policy (with at least a "name" field)
         """
-
         # Ensure we have a valid policy name & dict
         if isinstance(policy, str):
             pname = policy
@@ -116,7 +125,8 @@ class PiiSubstitutionValue:
         # Return the transformation for this policy
         if pname == "placeholder":
             if self._ph is None:
-                self._ph = PlaceholderValue(self._config)
+                cfg = self._config.get(defs.FMT_CONFIG_PLACEHOLDER)
+                self._ph = PlaceholderValue(cfg)
             return self._ph
         elif pname == "hash":
             try:
@@ -125,7 +135,8 @@ class PiiSubstitutionValue:
                 raise InvArgException("hash policy needs a key") from e
             return Hasher(key, size=policy.get("size"))
         elif pname == "synthetic":
-            raise UnimplementedException("synthetic policy not yet implemented")
+            cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM)
+            return SyntheticValue(cfg)
         elif pname == "custom":
             try:
                 return policy["template"]
@@ -134,6 +145,15 @@ class PiiSubstitutionValue:
         else:
             # a known policy with an available template
             return TEMPLATES[pname]
+
+
+    def reset(self):
+        """
+        Reset all caches (i.e. forget all previous assignments
+        """
+        for p in self._assign.values():
+            if hasattr(p, "reset"):
+                p.reset()
 
 
     def __call__(self, pii: PiiEntity) -> str:

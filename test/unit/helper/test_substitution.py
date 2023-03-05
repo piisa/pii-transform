@@ -45,8 +45,8 @@ def test11_constructor():
                                                  "template": "ABC"})
     assert str(m) == "<PiiSubstitutionValue #1>"
 
-    with pytest.raises(UnimplementedException):
-        mod.PiiSubstitutionValue(default_policy="synthetic")
+    mod.PiiSubstitutionValue(default_policy="synthetic")
+    assert str(m) == "<PiiSubstitutionValue #1>"
 
 
 def test110_redact():
@@ -146,7 +146,7 @@ def test151_hash_short():
 
 def test160_placeholder():
     """
-    Test constructing the object, set custom policy
+    Test constructing the object, set placeholder policy
     """
     m = mod.PiiSubstitutionValue(default_policy="placeholder")
 
@@ -171,14 +171,40 @@ def test170_passthrough():
         assert m(pii) == "1234 5678"
 
 
+def test180_synthetic():
+    """
+    Test constructing the object, set placeholder policy
+    """
+    config = {
+        defs.FMT_CONFIG_TRANSFORM: {
+            "seed": 1234,
+            "policy": {
+                PiiEnum.BLOCKCHAIN_ADDRESS: "placeholder"
+            }
+        }
+    }
+    m = mod.PiiSubstitutionValue(default_policy="synthetic", config=config)
+
+    uc = (
+        (PiiEnum.CREDIT_CARD, "30101901153007"),
+        (PiiEnum.BLOCKCHAIN_ADDRESS, "BLOCKCHAIN_ADDRESS"),
+        (PiiEnum.PERSON, "Mrs. Mariah Washington")
+    )
+    for pii, exp in uc:
+        pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
+        assert m(pii) == exp
+
+
 def test200_policies():
     """
     Test constructing the object, set detailed policy
     """
     config = {
-        defs.FMT_CONFIG_POLICY: {
-            PiiEnum.CREDIT_CARD: "redact",
-            PiiEnum.PERSON: "annotate"
+        defs.FMT_CONFIG_TRANSFORM: {
+            "policy": {
+                PiiEnum.CREDIT_CARD: "redact",
+                PiiEnum.PERSON: "annotate"
+            }
         }
     }
     m = mod.PiiSubstitutionValue(config=config)
@@ -187,6 +213,50 @@ def test200_policies():
         (PiiEnum.CREDIT_CARD, "<PII>"),
         (PiiEnum.BLOCKCHAIN_ADDRESS, "<BLOCKCHAIN_ADDRESS>"),
         (PiiEnum.PERSON, "<PERSON:1234 5678>")
+    )
+    for pii, exp in uc:
+        pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
+        assert m(pii) == exp
+
+
+def test210_reset():
+    """
+    Test resetting policies
+    """
+    config = {
+        defs.FMT_CONFIG_TRANSFORM: {
+            "seed": 1234,
+            "reset": "collection",
+            "default_policy": "redact",
+            "policy": {
+                PiiEnum.CREDIT_CARD: "placeholder",
+                PiiEnum.PERSON: "synthetic"
+            }
+        }
+    }
+    m = mod.PiiSubstitutionValue(config=config)
+
+    uc = (
+        (PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
+        (PiiEnum.BLOCKCHAIN_ADDRESS, "<BLOCKCHAIN_ADDRESS>"),
+        (PiiEnum.PERSON, "ACM Nutkrita Prachayaroch")
+    )
+    for pii, exp in uc:
+        pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
+        assert m(pii) == exp
+
+    # Repeat. The values are cached
+    for pii, exp in uc:
+        pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
+        assert m(pii) == exp
+
+    # Reset. Now the cache has been cleared
+    m.reset()
+
+    uc = (
+        (PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
+        (PiiEnum.BLOCKCHAIN_ADDRESS, "<BLOCKCHAIN_ADDRESS>"),
+        (PiiEnum.PERSON, "Tommy Roman")
     )
     for pii, exp in uc:
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
