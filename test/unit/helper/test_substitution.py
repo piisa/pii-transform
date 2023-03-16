@@ -152,8 +152,9 @@ def test160_placeholder():
 
     uc = (
         (PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
-        (PiiEnum.BLOCKCHAIN_ADDRESS, "BLOCKCHAIN_ADDRESS"),
-        (PiiEnum.PERSON, "John Doe")
+        (PiiEnum.BLOCKCHAIN_ADDRESS, "mwXvVQ6vgR78utyPnJrBYqRKJzMGzZiQ1v"),
+        (PiiEnum.PERSON, "John Doe"),
+        (PiiEnum.MEDICAL, "MEDICAL")
     )
     for pii, exp in uc:
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
@@ -187,7 +188,7 @@ def test180_synthetic():
 
     uc = (
         (PiiEnum.CREDIT_CARD, "30101901153007"),
-        (PiiEnum.BLOCKCHAIN_ADDRESS, "BLOCKCHAIN_ADDRESS"),
+        (PiiEnum.BLOCKCHAIN_ADDRESS, "mwXvVQ6vgR78utyPnJrBYqRKJzMGzZiQ1v"),
         (PiiEnum.PERSON, "Mrs. Mariah Washington")
     )
     for pii, exp in uc:

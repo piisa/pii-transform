@@ -62,7 +62,7 @@ def process_document(infile: str, outfile: str, piifile: str = None,
      :param config: additional configuration
      :param lang: default working language
      :param country: country(es) to restrict task for
-     :param task: restrict to an specific set of detection tasks
+     :param tasks: restrict to an specific set of detection tasks
      :param chunk_context: add contexts to chunks when detecting
      :param default_policy: default transform policy
      :param verbose: verbosity level, if > 0 print out progress messages

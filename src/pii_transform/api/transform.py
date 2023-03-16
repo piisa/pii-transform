@@ -54,6 +54,9 @@ class PiiTransformer:
         output = []
         pos = 0
         for pii in sorted(piic, key=attrgetter("pos")):
+            action = pii.fields.get("process", {}).get("action", "transform")
+            if action == "ignore":
+                continue
             output += [chunk.data[pos:pii.pos], self.subst(pii)]
             pos = pii.pos + len(pii)
         chunk_data = "".join(output) + chunk.data[pos:]

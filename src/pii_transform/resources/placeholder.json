@@ -53,6 +53,20 @@
       },
       "es": ["Fulano Pérez", "Mengano de Tal", "Zutano"],
       "de": ["Max Mustermann", "Erika Mustermann", "Otto Normalverbraucher"]
-    }
+    },
+
+    "BLOCKCHAIN_ADDRESS": [
+      "mwXvVQ6vgR78utyPnJrBYqRKJzMGzZiQ1v",
+      "n4pUpf65cHFDw8PyDF1LHc1qNdSsibyfCx",
+      "myW1MrQNKjrWaiQtXH6LU73SiufM32vHu7",
+      "mjiR1YStPWaXPnGYaCusuk39zEYkdanqcu"
+    ],
+
+    "IP_ADDRESS": [
+      "10.1.45.231",
+      "10.231.16.44",
+      "172.17.12.32",
+      "192.169.12.110"
+    ]
   }
 }

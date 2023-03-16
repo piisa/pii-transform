@@ -97,6 +97,29 @@ The constructor contains also additional arguments to select a subset of
 detection tasks to apply.
 
 
+## Multilingual process API for text buffers
+
+There is a small variant over the previous API, the `MultiPiiTextProcessor`
+object. This one accepts a _list of languages_ in its constructor; it then
+initializes a processor for each of them, and at processing time allows the
+selection of language (from among the ones that have been initialized).
+
+```Python
+from pii_transform.api.e2e import MultiPiiTextProcessor
+
+# Create the object, defining the languages to use and the policy
+# Further customization is possible by providing a config
+proc = PiiTextProcessor(lang=["en", "ch"], default_policy="label")
+
+# Process a text buffer and get the transformed buffer
+outbuf1 = proc(inbuf1, lang="en")
+outbuf2 = proc(inbuf2, lang="ch")
+```
+
+Note that each execution is monolingual, i.e. each text buffer must be in a
+single language.
+
+
 [policy]: policies.md
 [its implementation]: ../src/pii_transform/api/e2e/document.py
 [thin wrapper]: ../src/pii_transform/api/e2e/textchunk.py

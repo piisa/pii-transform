@@ -14,20 +14,25 @@ from typing import Dict, Callable
 from pii_data.types import PiiEntity, PiiEntityInfo, PiiEnum
 from pii_data.helper.exception import UnimplementedException
 
+try:
+    from pii_extract import LANG_ANY
+except ImportError:
+    LANG_ANY = "any"
+
 
 # How many entities to keep in cache to be able to reassign the same value
 DEFAULT_CACHE_SIZE = 200
 
 
 # Available countries per language
-COUNTRIES = {
-    'en': ['GB', 'IE', 'IN', 'NZ', 'US'],
-    'es': ['AR', 'CL', 'CO', 'ES', 'MX'],
-    'fr': ['BE', 'CA', 'CH', 'FR'],
-    'de': ['AT', 'CH', 'DE'],
-    'pt': ['BR', 'PT'],
-    'ro': ['RO']
-}
+# COUNTRIES = {
+#     'en': ['GB', 'IE', 'IN', 'NZ', 'US'],
+#     'es': ['AR', 'CL', 'CO', 'ES', 'MX'],
+#     'fr': ['BE', 'CA', 'CH', 'FR'],
+#     'de': ['AT', 'CH', 'DE'],
+#     'pt': ['BR', 'PT'],
+#     'ro': ['RO']
+# }
 
 
 # Faker providers to use, segmented by PII type & locale
@@ -117,7 +122,12 @@ class SyntheticValue:
         """
         # Define lang & country
         lang = info.lang or "en"
+        if lang == LANG_ANY:
+            lang = "en"
         country = info.country.upper() if info.country else None
+        if lang not in self._countries:
+            raise UnimplementedException("no countries available for lang: {}",
+                                         lang)
         if country not in self._countries[lang]:
             country = random.choice(self._countries[lang])
         faker_loc = f"{lang}_{country}"
