@@ -1,6 +1,8 @@
 v. 0.3.0
- * "synthetic" policy impelemented, using Faker
+ * "synthetic" policy implemented, using Faker
  * reset behaviour added to object
+ * "ignore" action respected
+ * MultiPiiTextProcessor object
 
 v. 0.2.4
  * fix: removed bogus argument in call to detect
