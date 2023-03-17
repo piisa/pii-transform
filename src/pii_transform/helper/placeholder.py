@@ -39,9 +39,13 @@ class PlaceholderValue:
          :param cache_size: size of the LRU cache used to maintain consistency
            in assignments
         """
-        # Get the placeholder config
+        # Get the placeholder default config
         base = Path(__file__).parents[1] / "resources" / PH_FILENAME
+
+        # Load the defualt config, and add to it the passed one
         config = load_single_config(base, defs.FMT_CONFIG_PLACEHOLDER, config)
+
+        # Get the placeholder values
         try:
             self._values = config["placeholder_values"]
         except KeyError as e:

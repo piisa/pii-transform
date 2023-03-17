@@ -18,7 +18,7 @@ def test10_constructor():
     Test constructing the object with default file
     """
     m = mod.PlaceholderValue()
-    assert str(m) == "<PlaceholderValue: #5>"
+    assert str(m) == "<PlaceholderValue: #7>"
 
 
 def test11_constructor_file():
@@ -26,16 +26,16 @@ def test11_constructor_file():
     Test constructing the object with specific config file
     """
     m = mod.PlaceholderValue(config=datafile("placeholder-test.json"))
-    assert str(m) == "<PlaceholderValue: #6>"
+    assert str(m) == "<PlaceholderValue: #8>"
 
 
 def test12_constructor_data():
     """
-    Test constructing the object with specific config data
+h    Test constructing the object with specific config data
     """
     config = load_config(datafile("placeholder-test.json"))
     m = mod.PlaceholderValue(config=config)
-    assert str(m) == "<PlaceholderValue: #6>"
+    assert str(m) == "<PlaceholderValue: #8>"
 
 
 def test20_value():
@@ -44,7 +44,7 @@ def test20_value():
     """
     m = mod.PlaceholderValue(config=datafile("placeholder-test.json"))
     pii = PiiEntity.build(PiiEnum.BLOCKCHAIN_ADDRESS, "1234", "43", 23)
-    assert m(pii) == "abc"
+    assert m(pii) == "mwXvVQ6vgR78utyPnJrBYqRKJzMGzZiQ1v"
 
     pii = PiiEntity.build(PiiEnum.MEDICAL, "1234", "43", 23)
     assert m(pii) == "MEDICAL"

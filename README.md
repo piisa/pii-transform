@@ -1,5 +1,10 @@
 # pii-transform
 
+[![version](https://img.shields.io/pypi/v/pii-transform)](https://pypi.org/project/pii-transform)
+[![changelog](https://img.shields.io/badge/change-log-blue)](CHANGES.md)
+[![license](https://img.shields.io/pypi/l/pii-transform)](LICENSE)
+[![build status](https://github.com/piisa/pii-transform/actions/workflows/pii-transform-pr.yml/badge.svg)](https://github.com/piisa/pii-transform/actions)
+
 This package takes a source document, a collection of detected PII instances,
 and transforms the document by replacing the PII instances in the document
 with a different representation.

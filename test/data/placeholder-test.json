@@ -6,7 +6,9 @@
       "9999 9999 9999 9999",
       "0000 0000 0000 0000"
     ],
-    "BLOCKCHAIN_ADDRESS": "abc",
+    "OTHER": [
+      "blah"
+    ],
     "PERSON": {
       "en": {
 	"any": ["John Doe", "Jane Doe"],

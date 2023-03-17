@@ -80,3 +80,20 @@ def test40_process_table():
     got = save_load(result)
     exp = load_yaml(DATADIR / "minidoc-example-table-repl.yaml")
     assert exp == got
+
+
+
+def test50_process_seq_ignore():
+    """
+    Modify the PII collection to ignore some of the fields
+    """
+    doc = LocalSrcDocumentFile(DATADIR / "minidoc-example-seq-orig.yaml")
+    pii = PiiCollectionLoader()
+    pii.load_json(DATADIR / "minidoc-example-seq-ignore-pii.json")
+
+    m = mod.PiiTransformer()
+    result = m(doc, pii)
+
+    got = save_load(result)
+    exp = load_yaml(DATADIR / "minidoc-example-seq-ignore-repl.yaml")
+    assert exp == got
