@@ -4,20 +4,24 @@ Multi-language processor for raw text buffers
 
 from typing import List, Tuple
 
+from packaging.version import Version
+
 from pii_data.helper.config import TYPE_CONFIG_LIST, load_config
-from pii_data.helper.exception import ProcException, InvArgException
+from pii_data.helper.exception import ProcException
 from pii_data.types import PiiCollection
 from pii_data.types.doc import DocumentChunk
 from pii_transform.api import PiiTransformer
 try:
     from pii_extract.api.processor import PiiProcessor, PiiCollectionBuilder
     from pii_extract.build.collection import TYPE_TASKENUM
+    from pii_extract import VERSION as PII_EXTRACT_VERSION
     MISSING = None
 except ImportError as e:
     MISSING = str(e)
-    TYPE_TASKENUM = List
     PiiProcessor = None
     PiiCollectionBuilder = None
+    TYPE_TASKENUM = List
+    PII_EXTRACT_VERSION = None
 
 
 
@@ -40,20 +44,23 @@ class MultiPiiTextProcessor:
         """
         if MISSING is not None:
             raise ProcException("missing package dependency: {}", MISSING)
+        elif Version(PII_EXTRACT_VERSION) < Version("0.3.0"):
+            raise ProcException("incompatible pii-extract-base version {}",
+                                PII_EXTRACT_VERSION)
+
         self.config = load_config(config or [])
         self.policy = default_policy
-        self.proc = {}
+        self.lang = lang
+        self.proc = PiiProcessor(config=self.config, debug=debug)
         for lng in lang:
-            proc = PiiProcessor(config=self.config, debug=debug)
             ctr = country[lng] if isinstance(country, dict) else country
-            proc.build_tasks(lang=lng, country=ctr, pii=tasks)
-            self.proc[lng] = proc
+            self.proc.build_tasks(lang=lng, country=ctr, pii=tasks)
         self.trf = PiiTransformer(default_policy=default_policy,
                                   config=self.config, debug=debug)
 
 
     def __repr__(self) -> str:
-        return f"<MultiPiiTextProcessor [#{len(self.proc)} {self.policy}]>"
+        return f"<MultiPiiTextProcessor [#{len(self.lang)} {self.policy}]>"
 
 
     def process(self, chunk: DocumentChunk) -> Tuple[DocumentChunk, PiiCollection]:
@@ -64,16 +71,11 @@ class MultiPiiTextProcessor:
         """
         try:
             lang = chunk.context["lang"]
-        except KeyError:
+        except (KeyError, TypeError):
             raise ProcException("missing chunk language")
 
-        try:
-            proc = self.proc[lang]
-        except KeyError:
-            raise InvArgException("language '{}' not loaded", lang)
-
         piic = PiiCollectionBuilder(lang=lang)
-        proc.detect_chunk(chunk, piic)
+        self.proc.detect_chunk(chunk, piic)
         chunk = self.trf.transform_chunk(chunk, piic)
         return chunk, piic
 

@@ -4,8 +4,9 @@ Test the MultiPiiTextProcessor class
 
 from pathlib import Path
 
+from pii_data.types.doc import DocumentChunk
 from pii_data.types.piicollection.loader import PiiCollectionLoader
-from pii_data.helper.exception import InvArgException
+from pii_data.helper.exception import ProcException
 
 import pii_transform.api.e2e.multilang as mod
 
@@ -20,10 +21,15 @@ def patch_pii_extract(monkeypatch, piic=None):
     Patch the pii-extract-base API used by textchunk
     """
     processor_mock = Mock()
+    processor_cls = Mock(return_value=processor_mock)
     collection_mock = Mock(return_value=piic)
+    # Remove the mark of import fail
     monkeypatch.setattr(mod, "MISSING", None)
-    monkeypatch.setattr(mod, "PiiProcessor", processor_mock)
+    # Set the processor to be a mock
+    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.3.0")
+    monkeypatch.setattr(mod, "PiiProcessor", processor_cls)
     monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_mock)
+    return processor_mock
 
 
 # -----------------------------------------------------------------------
@@ -33,10 +39,13 @@ def test10_constructor(monkeypatch):
     """
     Test constructing the object
     """
-    patch_pii_extract(monkeypatch)
+    mock = patch_pii_extract(monkeypatch)
 
     m = mod.MultiPiiTextProcessor(["en", "es"])
     assert str(m) == "<MultiPiiTextProcessor [#2 label]>"
+
+    assert mock.build_tasks.call_count == 2
+
 
 
 def test11_constructor_error(monkeypatch):
@@ -107,7 +116,8 @@ def test50_process_chunk_err(monkeypatch):
         src = f.read()
 
     m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="annotate")
-    assert str(m) == "<MultiPiiTextProcessor [#2 annotate]>"
 
-    with pytest.raises(InvArgException):
-        m(src, "fr")
+    # A chunk with no language
+    chunk = DocumentChunk(id=0, data=src)
+    with pytest.raises(ProcException):
+        m.process(chunk)

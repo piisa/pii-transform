@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v. 0.3.1
+ * fixed multilang to use the new multilingual capabilities in
+   pii-extract-base 0.3.0
+
 ## v. 0.3.0
  * "synthetic" policy implemented, using Faker
  * reset behaviour added to object
