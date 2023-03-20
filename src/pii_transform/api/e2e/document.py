@@ -104,7 +104,7 @@ def process_document(infile: str, outfile: str, piifile: str = None,
     if show_tasks:
         print_tasks(lang, proc, sys.stdout)
 
-    # Process the file
+    # Process the file to extract PII
     log(". Detecting PII instances")
     piic = proc(doc, chunk_context=chunk_context)
 
