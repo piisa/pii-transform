@@ -2,7 +2,7 @@
 Process raw text buffers
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from pii_data.helper.config import TYPE_CONFIG_LIST, load_config
 from pii_data.helper.exception import ProcException
@@ -73,3 +73,10 @@ class PiiTextProcessor:
         input_chunk = DocumentChunk(id=0, data=text)
         output_chunk, piic = self.process(input_chunk)
         return output_chunk.data
+
+
+    def stats(self) -> Dict:
+        """
+        Returns statistics on the detected PII instances
+        """
+        return self._proc.get_stats()

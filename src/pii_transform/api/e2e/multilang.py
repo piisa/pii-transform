@@ -2,7 +2,7 @@
 Multi-language processor for raw text buffers
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from packaging.version import Version
 
@@ -33,13 +33,15 @@ class MultiPiiTextProcessor:
 
     def __init__(self, lang: List[str], default_policy: str = "label",
                  config: TYPE_CONFIG_LIST = None, country: List[str] = None,
-                 tasks: TYPE_TASKENUM = None, debug: bool = False):
+                 tasks: TYPE_TASKENUM = None, keep_piic: bool = False,
+                 debug: bool = False):
         """
          :param lang: list of languages that text buffers can be in
          :param default_policy: default transformation policy to use
          :param config: configuration(s) to load, in addition to the defaults
          :param country: country(es) to restrict task for
          :param tasks: restrict to an specific set of detection tasks
+         :param keep_piic: store all detected PII
          :param debug: activate debug output
         """
         if MISSING is not None:
@@ -48,15 +50,17 @@ class MultiPiiTextProcessor:
             raise ProcException("incompatible pii-extract-base version {}",
                                 PII_EXTRACT_VERSION)
 
+        self.cid = 1
         self.config = load_config(config or [])
         self.policy = default_policy
         self.lang = lang
-        self.proc = PiiProcessor(config=self.config, debug=debug)
+        self._proc = PiiProcessor(config=self.config, debug=debug)
+        self._piic = PiiCollectionBuilder() if keep_piic else None
         for lng in lang:
             ctr = country[lng] if isinstance(country, dict) else country
-            self.proc.build_tasks(lang=lng, country=ctr, pii=tasks)
-        self.trf = PiiTransformer(default_policy=default_policy,
-                                  config=self.config, debug=debug)
+            self._proc.build_tasks(lang=lng, country=ctr, pii=tasks)
+        self._trf = PiiTransformer(default_policy=default_policy,
+                                   config=self.config, debug=debug)
 
 
     def __repr__(self) -> str:
@@ -74,9 +78,10 @@ class MultiPiiTextProcessor:
         except (KeyError, TypeError):
             raise ProcException("missing chunk language")
 
-        piic = PiiCollectionBuilder(lang=lang)
-        self.proc.detect_chunk(chunk, piic)
-        chunk = self.trf.transform_chunk(chunk, piic)
+        piic = self._piic or PiiCollectionBuilder(lang=lang)
+        self._proc.detect_chunk(chunk, piic)
+        print("LEN", self._piic, len(piic))
+        chunk = self._trf.transform_chunk(chunk, piic)
         return chunk, piic
 
 
@@ -88,6 +93,22 @@ class MultiPiiTextProcessor:
           :param lang: text language
           :return: the trasformed text buffer
         """
-        input_chunk = DocumentChunk(id=0, data=text, context={"lang": lang})
+        self.cid += 1
+        input_chunk = DocumentChunk(id=self.cid, data=text,
+                                    context={"lang": lang})
         output_chunk, piic = self.process(input_chunk)
         return output_chunk.data
+
+
+    def piic(self) -> PiiCollection:
+        """
+        Returns the object with all detected PII (if configured)
+        """
+        return self._piic
+
+
+    def stats(self) -> Dict:
+        """
+        Returns statistics on the detected PII instances
+        """
+        return self._proc.get_stats()
