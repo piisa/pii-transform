@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v. 0.4.0
+ * chunk e2e processors improvement
+    - stats() method for PiiTextProcessor & MultiPiiTextProcessor
+	- piic() method for MultiPiiTextProcessor
+
 ## v. 0.3.1
  * fixed multilang to use the new multilingual capabilities in
    pii-extract-base 0.3.0

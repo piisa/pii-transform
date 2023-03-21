@@ -21,6 +21,7 @@ def patch_pii_extract(monkeypatch, piic=None):
     Patch the pii-extract-base API used by textchunk
     """
     processor_mock = Mock()
+    processor_mock.get_stats = Mock()
     processor_cls = Mock(return_value=processor_mock)
     collection_mock = Mock(return_value=piic)
     # Remove the mark of import fail
@@ -121,3 +122,41 @@ def test50_process_chunk_err(monkeypatch):
     chunk = DocumentChunk(id=0, data=src)
     with pytest.raises(ProcException):
         m.process(chunk)
+
+
+def test60_process_piic(monkeypatch):
+    """
+    Test stats
+    """
+    piic = PiiCollectionLoader()
+    piic.load_json(DATADIR / "example-pii.json")
+    patch_pii_extract(monkeypatch, piic)
+
+    with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
+        src = f.read()
+
+    m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="annotate",
+                                  keep_piic=True)
+
+    m(src, "en")
+
+    piic = m.piic()
+    assert len(piic) == 2
+
+
+def test60_process_stats(monkeypatch):
+    """
+    Test stats
+    """
+    piic = PiiCollectionLoader()
+    piic.load_json(DATADIR / "example-pii.json")
+    proc = patch_pii_extract(monkeypatch, piic)
+
+    with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
+        src = f.read()
+
+    m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="annotate")
+
+    m(src, "en")
+    m.stats()
+    assert proc.get_stats.called
