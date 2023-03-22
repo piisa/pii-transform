@@ -26,7 +26,7 @@ class PiiTextProcessor:
     A simple class that performs end2end PII processing on a text buffer
     """
 
-    def __init__(self, lang: str = "en", default_policy: str = "label",
+    def __init__(self, lang: str = "en", default_policy: str = None,
                  config: TYPE_CONFIG_LIST = None, country: List[str] = None,
                  tasks: TYPE_TASKENUM = None, debug: bool = False):
         """
@@ -39,6 +39,7 @@ class PiiTextProcessor:
         """
         if MISSING is not None:
             raise ProcException("missing package dependency: {}", MISSING)
+        self._cid = 0
         self.config = load_config(config or [])
         self.lang = lang
         self.policy = default_policy
@@ -70,7 +71,8 @@ class PiiTextProcessor:
         according to the defined policy
           :return: the trasformed text buffer
         """
-        input_chunk = DocumentChunk(id=0, data=text)
+        self._cid += 1
+        input_chunk = DocumentChunk(id=self._cid, data=text)
         output_chunk, piic = self.process(input_chunk)
         return output_chunk.data
 

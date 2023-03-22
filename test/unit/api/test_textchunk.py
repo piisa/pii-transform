@@ -34,8 +34,8 @@ def test10_constructor(monkeypatch):
     """
     patch_pii_extract(monkeypatch)
 
-    m = mod.PiiTextProcessor()
-    assert str(m) == "<PiiTextProcessor [label]>"
+    m = mod.PiiTextProcessor(default_policy="annotate")
+    assert str(m) == "<PiiTextProcessor [annotate]>"
 
 
 def test20_process_chunk(monkeypatch):

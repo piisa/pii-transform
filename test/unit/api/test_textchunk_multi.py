@@ -22,12 +22,13 @@ def patch_pii_extract(monkeypatch, piic=None):
     """
     processor_mock = Mock()
     processor_mock.get_stats = Mock()
+    processor_mock.build_tasks = Mock(return_value=2)
     processor_cls = Mock(return_value=processor_mock)
     collection_mock = Mock(return_value=piic)
     # Remove the mark of import fail
     monkeypatch.setattr(mod, "MISSING", None)
     # Set the processor to be a mock
-    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.3.0")
+    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.3.1")
     monkeypatch.setattr(mod, "PiiProcessor", processor_cls)
     monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_mock)
     return processor_mock
@@ -42,8 +43,8 @@ def test10_constructor(monkeypatch):
     """
     mock = patch_pii_extract(monkeypatch)
 
-    m = mod.MultiPiiTextProcessor(["en", "es"])
-    assert str(m) == "<MultiPiiTextProcessor [#2 label]>"
+    m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="label")
+    assert str(m) == "<MultiPiiTextProcessor [#2/4 label]>"
 
     assert mock.build_tasks.call_count == 2
 
@@ -71,7 +72,7 @@ def test20_process_chunk(monkeypatch):
         src = f.read()
 
     m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="annotate")
-    assert str(m) == "<MultiPiiTextProcessor [#2 annotate]>"
+    assert str(m) == "<MultiPiiTextProcessor [#2/4 annotate]>"
 
     with open(DATADIR / "example-trf.txt", encoding="utf-8") as f:
         exp = f.read()
@@ -96,7 +97,7 @@ def test30_process_chunk_rev(monkeypatch):
         src = f.read()
 
     m = mod.MultiPiiTextProcessor(["en"], default_policy="annotate")
-    assert str(m) == "<MultiPiiTextProcessor [#1 annotate]>"
+    assert str(m) == "<MultiPiiTextProcessor [#1/2 annotate]>"
 
     with open(DATADIR / "example-trf.txt", encoding="utf-8") as f:
         exp = f.read()
