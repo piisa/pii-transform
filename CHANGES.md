@@ -2,6 +2,7 @@
 
 ## v. 0.4.0
  * chunk e2e processors improvement
+    - number chunks
     - stats() method for PiiTextProcessor & MultiPiiTextProcessor
 	- piic() method for MultiPiiTextProcessor
 
