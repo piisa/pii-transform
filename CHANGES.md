@@ -1,5 +1,8 @@
 # ChangeLog
 
+## v. 0.4.2
+ * fix: wrong piic object in MultiPiiTextProcessor with `keep_piic`
+
 ## v. 0.4.0
  * chunk e2e processors improvement
     - number chunks

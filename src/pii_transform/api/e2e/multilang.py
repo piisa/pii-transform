@@ -84,7 +84,7 @@ class MultiPiiTextProcessor:
         except (KeyError, TypeError):
             raise ProcException("missing chunk language")
 
-        piic = self._piic or PiiCollectionBuilder(lang=lang)
+        piic = self._piic if self._piic is not None else PiiCollectionBuilder(lang=lang)
         self._proc.detect_chunk(chunk, piic)
         chunk = self._trf.transform_chunk(chunk, piic)
         return chunk, piic
