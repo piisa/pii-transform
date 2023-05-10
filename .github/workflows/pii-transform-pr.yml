@@ -31,6 +31,11 @@ jobs:
       with:
         repository: piisa/pii-data
         path: pii-data
+    - name: Checkout pii-extract-base dependency
+      uses: actions/checkout@main
+      with:
+        repository: piisa/pii-extract-base
+        path: pii-extract-base
     - name: Create venv
       run: |
         cd pii-transform
@@ -39,10 +44,10 @@ jobs:
       run: |
         cd pii-data
         VENV=$GITHUB_WORKSPACE/venv make install
-    - name: Install the remaining package dependencies
+    - name: Install pii-extract-base from local into the venv
       run: |
-        cd pii-transform
-        VENV="$GITHUB_WORKSPACE/venv" make install-dependencies
+        cd pii-extract-base
+        VENV=$GITHUB_WORKSPACE/venv make install
     - name: Install main package
       run: |
         cd pii-transform

@@ -1,16 +1,17 @@
 """
 The main object performing PII value substitution
 """
+import random
 import hashlib
 
 from typing import Union, Dict, Callable
 
-from pii_data.helper.exception import InvArgException, UnimplementedException
+from pii_data.helper.exception import InvArgException
 from pii_data.types import PiiEnum, PiiEntity
 
 from .. import defs
 from .placeholder import PlaceholderValue
-from .synthetic import SyntheticValue
+from .synthetic import SyntheticValue, PROVIDER as SYNT_PROVIDER
 
 
 DEFAULT_POLICY = "label"
@@ -87,12 +88,17 @@ class PiiSubstitutionValue:
             do not have a specific policy in the configuration
          :param config: configuration to apply
         """
+        self._cache = {}
         self._config = config or {}
-        self._ph = None
+        cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM) or {}
+
+        # Set the random seed, if needed
+        self.seed = cfg.get("seed") if config else None
+        if self.seed:
+            random.seed(self.seed)
 
         # Build the policy assigner
         self._assign = {"default": self._policy(default_policy or DEFAULT_POLICY)}
-        cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM) or {}
         policy = cfg.get("policy")
         if policy is not None:
             for p, v in policy.items():
@@ -124,19 +130,21 @@ class PiiSubstitutionValue:
 
         # Return the transformation for this policy
         if pname == "placeholder":
-            if self._ph is None:
+            if pname not in self._cache:
                 cfg = self._config.get(defs.FMT_CONFIG_PLACEHOLDER)
-                self._ph = PlaceholderValue(cfg)
-            return self._ph
+                self._cache[pname] = PlaceholderValue(cfg)
+            return self._cache[pname]
+        elif pname == "synthetic":
+            if pname not in self._cache:
+                cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM)
+                self._cache[pname] = SyntheticValue(cfg)
+            return self._cache[pname]
         elif pname == "hash":
             try:
                 key = policy["key"]
             except KeyError as e:
                 raise InvArgException("hash policy needs a key") from e
             return Hasher(key, size=policy.get("size"))
-        elif pname == "synthetic":
-            cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM)
-            return SyntheticValue(cfg)
         elif pname == "custom":
             try:
                 return policy["template"]
@@ -149,7 +157,7 @@ class PiiSubstitutionValue:
 
     def reset(self):
         """
-        Reset all caches (i.e. forget all previous assignments
+        Reset all caches (i.e. forget all previous substitutions)
         """
         for p in self._assign.values():
             if hasattr(p, "reset"):
@@ -161,8 +169,14 @@ class PiiSubstitutionValue:
         Find the substitution string for an entity, according to the installed
         policies
         """
-        v = self._assign.get(pii.fields["type"]) or self._assign["default"]
-        if isinstance(v, str):
-            return v.format_map(DefaultEmpty(pii.asdict()))
+        # Find the substitution processor.
+        # For Synthetic ensure we've got a provider, else use the default
+        proc = self._assign.get(pii.fields["type"]) or self._assign["default"]
+        if isinstance(proc, SyntheticValue) and pii.info.pii not in SYNT_PROVIDER:
+            proc = self._policy(DEFAULT_POLICY)
+
+        # Apply the processor
+        if isinstance(proc, str):
+            return proc.format_map(DefaultEmpty(pii.asdict()))
         else:
-            return v(pii)
+            return proc(pii)

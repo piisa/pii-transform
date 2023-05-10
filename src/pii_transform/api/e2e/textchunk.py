@@ -1,23 +1,29 @@
 """
-Process raw text buffers
+Processor for raw text buffers.
+All buffers must be in the same language.
 """
 
 from typing import List, Tuple, Dict
+
+from packaging.version import Version
 
 from pii_data.helper.config import TYPE_CONFIG_LIST, load_config
 from pii_data.helper.exception import ProcException
 from pii_data.types import PiiCollection
 from pii_data.types.doc import DocumentChunk
 from pii_transform.api import PiiTransformer
+from . import defs
 try:
     from pii_extract.api.processor import PiiProcessor, PiiCollectionBuilder
-    from pii_extract.build.collection import TYPE_TASKENUM
-    MISSING = None
+    from pii_extract.gather.collection import TYPE_TASKENUM
+    from pii_extract import VERSION as PII_EXTRACT_VERSION
+    MISSING_MOD = None
 except ImportError as e:
-    MISSING = str(e)
-    TYPE_TASKENUM = List
+    MISSING_MOD = str(e)
     PiiProcessor = None
     PiiCollectionBuilder = None
+    TYPE_TASKENUM = List
+    PII_EXTRACT_VERSION = None
 
 
 
@@ -30,15 +36,18 @@ class PiiTextProcessor:
                  config: TYPE_CONFIG_LIST = None, country: List[str] = None,
                  tasks: TYPE_TASKENUM = None, debug: bool = False):
         """
-         :param lang: language that text buffers will be in
+         :param lang: language that all text buffers will be in
          :param default_policy: default transformation policy to use
          :param config: configuration(s) to load, in addition to the defaults
          :param country: country(es) to restrict task for
          :param tasks: restrict to an specific set of detection tasks
          :param debug: activate debug output
         """
-        if MISSING is not None:
-            raise ProcException("missing package dependency: {}", MISSING)
+        if MISSING_MOD is not None:
+            raise ProcException("missing package dependency: {}", MISSING_MOD)
+        elif Version(PII_EXTRACT_VERSION) < Version(defs.MIN_PII_EXTRACT_VERSION):
+            raise ProcException("incompatible pii-extract-base version {}",
+                                PII_EXTRACT_VERSION)
         self._cid = 0
         self.config = load_config(config or [])
         self.lang = lang
@@ -72,7 +81,8 @@ class PiiTextProcessor:
           :return: the trasformed text buffer
         """
         self._cid += 1
-        input_chunk = DocumentChunk(id=self._cid, data=text)
+        input_chunk = DocumentChunk(id=self._cid, data=text,
+                                    context={"lang": self.lang})
         output_chunk, piic = self.process(input_chunk)
         return output_chunk.data
 

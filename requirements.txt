@@ -1,4 +1,4 @@
 packaging >= 21.3
 faker >= 17.6.0
 
-pii-data >= 0.2.0, <1.0.0
+pii-data >= 0.4.0, <1.0.0

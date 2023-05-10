@@ -6,10 +6,13 @@ import sys
 
 from typing import List, Union, Dict
 
+from packaging.version import Version
+
 from pii_data.helper.io import openfile
 from pii_data.helper.config import load_config, TYPE_CONFIG_LIST
 from pii_data.helper.exception import InvArgException, ProcException
 from ..transform import PiiTransformer
+from . import defs
 try:
     from pii_data.helper.logger import PiiLogger
 except ImportError:
@@ -18,11 +21,15 @@ try:
     from pii_preprocess.loader import DocumentLoader
     from pii_extract.api import PiiProcessor
     from pii_extract.api.file import piic_format, print_stats, print_tasks
-    from pii_extract.build.collection import TYPE_TASKENUM
-    MISSING_LIBS = None
+    from pii_extract.gather.collection import TYPE_TASKENUM
+    from pii_extract import VERSION as PII_EXTRACT_VERSION
+    MISSING_MOD = None
 except ImportError as e:
-    MISSING_LIBS = str(e)
+    MISSING_MOD = str(e)
+    DocumentLoader = None
+    PiiProcessor = None
     TYPE_TASKENUM = List
+    PII_EXTRACT_VERSION = None
 
 
 def format_policy(name: str, param: str = None) -> Dict:
@@ -69,8 +76,12 @@ def process_document(infile: str, outfile: str, piifile: str = None,
      :param show_tasks: print out the list of built tasks
      :param show_stats: print out statistics on detected PII
     """
-    if MISSING_LIBS is not None:
-        raise ProcException("Error: missing package dependency: {}", MISSING_LIBS)
+    if MISSING_MOD is not None:
+        raise ProcException("Error: missing package dependency: {}", MISSING_MOD)
+    elif Version(PII_EXTRACT_VERSION) < Version(defs.MIN_PII_EXTRACT_VERSION):
+        raise ProcException("incompatible pii-extract-base version {}",
+                            PII_EXTRACT_VERSION)
+
     log = PiiLogger(__name__, verbose > 0)
 
     # Load a configuration, if given

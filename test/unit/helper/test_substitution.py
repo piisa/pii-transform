@@ -2,6 +2,7 @@
 Test the PiiSubstitutionValue class
 """
 
+import random
 import pytest
 
 from pii_data.helper.exception import InvArgException, UnimplementedException
@@ -10,6 +11,9 @@ from pii_data.types import PiiEnum, PiiEntity
 from pii_transform import defs
 import pii_transform.helper.substitution as mod
 
+
+
+# ------------------------------------------------------------------------
 
 
 def test10_constructor():
@@ -148,10 +152,14 @@ def test160_placeholder():
     """
     Test constructing the object, set placeholder policy
     """
-    m = mod.PiiSubstitutionValue(default_policy="placeholder")
+    config = {
+        defs.FMT_CONFIG_TRANSFORM: {"seed": 1234}
+    }
+    m = mod.PiiSubstitutionValue(default_policy="placeholder", config=config)
 
     uc = (
-        (PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
+        (PiiEnum.CREDIT_CARD, "9999 9999 9999 9999"),
+        #(PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
         (PiiEnum.BLOCKCHAIN_ADDRESS, "mwXvVQ6vgR78utyPnJrBYqRKJzMGzZiQ1v"),
         (PiiEnum.PERSON, "John Doe"),
         (PiiEnum.MEDICAL, "MEDICAL")
@@ -238,26 +246,29 @@ def test210_reset():
     m = mod.PiiSubstitutionValue(config=config)
 
     uc = (
-        (PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
+        (PiiEnum.CREDIT_CARD, "9999 9999 9999 9999"),
+        #(PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
         (PiiEnum.BLOCKCHAIN_ADDRESS, "<BLOCKCHAIN_ADDRESS>"),
-        (PiiEnum.PERSON, "ACM Nutkrita Prachayaroch")
+        (PiiEnum.PERSON, "Jessica Smith")
     )
+
+    # Substitute
     for pii, exp in uc:
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
         assert m(pii) == exp
 
-    # Repeat. The values are cached
+    # Repeat. The previois values are cached, so we get the same
     for pii, exp in uc:
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
         assert m(pii) == exp
 
-    # Reset. Now the cache has been cleared
+    # Reset. Now the cache has been cleared, so we might get different values
     m.reset()
 
     uc = (
-        (PiiEnum.CREDIT_CARD, "0123 0123 0123 0123"),
+        (PiiEnum.CREDIT_CARD, "9999 9999 9999 9999"),
         (PiiEnum.BLOCKCHAIN_ADDRESS, "<BLOCKCHAIN_ADDRESS>"),
-        (PiiEnum.PERSON, "Tommy Roman")
+        (PiiEnum.PERSON, "Teresa Aguilar")
     )
     for pii, exp in uc:
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
