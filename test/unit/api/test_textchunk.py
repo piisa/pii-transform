@@ -20,7 +20,7 @@ def patch_pii_extract(monkeypatch, piic=None):
     """
     processor_mock = Mock()
     collection_mock = Mock(return_value=piic)
-    monkeypatch.setattr(mod, "MISSING", None)
+    monkeypatch.setattr(mod, "MISSING_MOD", None)
     monkeypatch.setattr(mod, "PiiProcessor", processor_mock)
     monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_mock)
 

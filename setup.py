@@ -72,6 +72,7 @@ setup_args = dict(
         "console_scripts": [
             "pii-transform = pii_transform.app.transform:main",
             "pii-process = pii_transform.app.process:main",
+            "pii-process-jsonl = pii_transform.app.multi:main",
         ]
     },
     include_package_data=False,

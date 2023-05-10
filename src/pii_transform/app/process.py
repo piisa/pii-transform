@@ -10,7 +10,7 @@ from typing import List
 from .. import VERSION
 from ..helper.substitution import POLICIES
 
-from ..api.e2e import process_document, format_policy, MISSING_LIBS
+from ..api.e2e import process_document, format_policy, MISSING_MOD
 
 
 # -------------------------------------------------------------------------
@@ -60,8 +60,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
 
 
 def main(args: List[str] = None):
-    if MISSING_LIBS is not None:
-        print("Error: missing package dependency:", MISSING_LIBS)
+    if MISSING_MOD is not None:
+        print("Error: missing package dependency:", MISSING_MOD)
         sys.exit(1)
     if args is None:
         args = sys.argv[1:]

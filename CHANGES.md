@@ -1,5 +1,12 @@
 # ChangeLog
 
+## v.0.5.0
+ * improve stats gathering: add counts and timings
+ * make placeholder policy start randomly on each list of candidates
+ * cache placeholder & synthetic objects upon first initialization
+ * for synthetic policy, revert to default policy if we cannot find a provider
+ * JSONL processing script
+
 ## v. 0.4.2
  * fix: wrong piic object in MultiPiiTextProcessor with `keep_piic`
 

@@ -12,6 +12,7 @@ Properties are:
  * the list is rotated as much as needed
 """
 
+import random
 from pathlib import Path
 from functools import lru_cache
 from collections import defaultdict
@@ -64,7 +65,7 @@ class PlaceholderValue:
 
     def _select_value(self, pii: PiiEntity) -> Union[str, List[str]]:
         """
-        Select the value to apply from the placeholder database
+        Select the value to apply from the placeholder data
         """
         fields = pii.fields
         pii_type = fields["type"]
@@ -92,10 +93,16 @@ class PlaceholderValue:
 
         Note: "value" is used as argument only to trigger LRU cache retrieval
         """
+        # First time we use this key?
+        num_choices = len(choices)
+        if key not in self._index:
+            self._index[key] = random.randrange(num_choices)
+
+        # Select element & rotate key for next call
         try:
             return choices[self._index[key]]
         finally:
-            self._index[key] = (self._index[key] + 1) % len(choices)
+            self._index[key] = (self._index[key] + 1) % num_choices
 
 
     def __call__(self, pii: PiiEntity) -> str:

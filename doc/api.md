@@ -1,7 +1,7 @@
 # Provided APIs
 
-This package provides three different Python APIs, one local to the package and
-two for end-to-end processing.
+This package provides four different Python APIs, one local to the package and
+three for end-to-end processing.
 
 
 ## Transform API
@@ -79,10 +79,11 @@ outbuf = proc(inbuf)
 ```
 
 This is a [thin wrapper] over the relevant objects in the PIISA libraries.
-The procedure is:
+The procedure to use it is:
  1. Initialize a `PiiTextProcessor` object, giving as arguments the language
-    the text will be in and the default [policy] to apply to transform the
-	PII instances found
+    the text will be in and a default [policy] to apply to transform the
+	PII instances found (note that the default config might define other
+	policies for specific PII types).
  2. Call the object with a text buffer. It will detect PII instances in it
     and apply the transformation, and will return the transformed text buffer.
 
@@ -102,12 +103,13 @@ detection tasks to apply.
 There is a small variant over the previous API, the `MultiPiiTextProcessor`
 object. This one accepts a _list of languages_ in its constructor; it then
 initializes a processor for each of them, and at processing time allows the
-selection of language (from among the ones that have been initialized).
+selection of language (from among the ones that have been initialized) for
+each text buffer to be processed.
 
 ```Python
 from pii_transform.api.e2e import MultiPiiTextProcessor
 
-# Create the object, defining the languages to use and the policy
+# Create the object, defining the languages to use and the default policy
 # Further customization is possible by providing a config
 proc = MultiPiiTextProcessor(lang=["en", "ch"], default_policy="label")
 
@@ -122,8 +124,12 @@ stats = proc.stats()
 Note that each execution is monolingual, i.e. each text buffer must be in a
 _single_ language.
 
+In adition to the default method, which takes a raw text buffer, the object also
+contains a `process()` method that takes a [`DocumentChunk`] object.
+
 
 [policy]: policies.md
 [its implementation]: ../src/pii_transform/api/e2e/document.py
 [thin wrapper]: ../src/pii_transform/api/e2e/textchunk.py
 [configuration]: https://github.com/piisa/piisa/tree/main/docs/configuration.md
+[`DocumentChunk`]: https://github.com/piisa/pii-data/blob/main/doc/chunks.md
