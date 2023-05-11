@@ -76,7 +76,7 @@ class MultiPiiTextProcessor:
         self.policy = default_policy
 
         # Build detectors
-        self._proc = PiiProcessor(config=self.config, debug=debug)
+        self._proc = PiiProcessor(config=self.config, languages=lang, debug=debug)
         num = 0
         for lng in lang:
             ctr = country[lng] if isinstance(country, dict) else country

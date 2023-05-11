@@ -52,7 +52,7 @@ class PiiTextProcessor:
         self.config = load_config(config or [])
         self.lang = lang
         self.policy = default_policy
-        self.proc = PiiProcessor(config=self.config, debug=debug)
+        self.proc = PiiProcessor(config=self.config, languages=lang, debug=debug)
         self.proc.build_tasks(lang=lang, country=country, pii=tasks)
         self.trf = PiiTransformer(default_policy=default_policy,
                                   config=self.config, debug=debug)

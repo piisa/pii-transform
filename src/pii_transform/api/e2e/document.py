@@ -107,7 +107,7 @@ def process_document(infile: str, outfile: str, piifile: str = None,
 
     # Create a PiiProcessor object for PII detection
     log(". Loading task processor")
-    proc = PiiProcessor(debug=verbose > 1, config=config)
+    proc = PiiProcessor(debug=verbose > 1, languages=lang, config=config)
 
     # Build the task objects
     log(". Building task objects")

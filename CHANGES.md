@@ -1,6 +1,10 @@
 # ChangeLog
 
-## v.0.5.0
+## v. 0.5.1
+ * fix: pass the language list to PiiProcessor on object construction
+ * update dynamic version checking for pii_extract
+
+## v. 0.5.0
  * improve stats gathering: add counts and timings
  * make placeholder policy start randomly on each list of candidates
  * cache placeholder & synthetic objects upon first initialization
