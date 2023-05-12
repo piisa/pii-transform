@@ -24,7 +24,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
                     help="output all detected PII instances")
 
     g1 = parser.add_argument_group("Language & data specification")
-    g1.add_argument("--lang", nargs='+', default=["en", "es"],
+    g1.add_argument("--lang", nargs='+', default=["en"],
                     help="processing languages (default: %(default)s)")
     g1.add_argument("--field-lang", nargs="+", default=("lang", "language"),
                     help="document field defining the language (default: %(default)s)")

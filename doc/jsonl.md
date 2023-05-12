@@ -29,16 +29,21 @@ Those two field names can be:
    then it is understood as a nested dict, and the script will navigate the
    structure to locate the field
    
-The remaining fields in the JSONL document will not be used (but will be
+The remaining fields in the JSONL document will not be used (but will still be
 copied over to the output document)
 
 
 ## Language specification
 
-The script has a `--lang` option to indicate the languages to be instantiated
-for detectors (as a list of [ISO 639-1] 2-letter language codes). It is therefore
-needed to know beforehand _the list of languages the documents in the JSONL
-file can be in_.
+The script has a `--lang` option to indicate the list of languages to be
+instantiated for detectors (it should contain a list of [ISO 639-1] 2-letter
+language codes). It is therefore needed to know beforehand _the list of languages
+the documents in the JSONL file can be in_.
+
+You can see the list of languages with available detectors by using the
+`pii-task-info --list-languages` command (this command-line script is
+part of the `pii-extract-base` package). The default value (if the `--lang`
+option is not specified) is to instantiate just English.
 
 There are two cases in which a document in the JSONL file will not be processed:
  1. If the document defines a language that was not specified in the initial
@@ -47,10 +52,15 @@ There are two cases in which a document in the JSONL file will not be processed:
 
 In both cases, the document will be copied unmodified to the output, with these
 exceptions for case 2:
- * if the language list supplied to the script contains a single language, it
-   will be assumed that the document is in that language, and will get processed
+ * if the `--lang` list supplied to the script contains a single language, it
+   will be assumed that this is the document language, and so it will get processed
  * else, if the `--raise-no-lang` option was specified, an exception will be
    raised instead of copying the unmodified document
+
+If one of the languages requested in the `--lang` option is not in the list of
+available languages, it means there are no specific detectors available for
+it. Documents defining that language will only use the language-independent
+detectors (e.g. email addresses, credit card numbers).
 
 
 ## PII output
