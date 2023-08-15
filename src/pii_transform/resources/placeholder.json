@@ -19,6 +19,9 @@
       },
       "es": {
 	"es": ["12345678Z", "11111111H"]
+      },
+      "kr": {
+  "kr":"881120-1068234"
       }
     },
 
@@ -35,6 +38,11 @@
 	"es": [
 	  "999 123 456", "999 000 000", "998 123 456", "998 123 456"
 	]
+      },
+      "kr": {
+  "kr": [
+          "(010) 1234-5678", "(031) 123-4563", "+821012345678"
+        ]
       }
     },
 
@@ -52,7 +60,8 @@
 	"gb": "Joe Bloggs"
       },
       "es": ["Fulano Pérez", "Mengano de Tal", "Zutano"],
-      "de": ["Max Mustermann", "Erika Mustermann", "Otto Normalverbraucher"]
+      "de": ["Max Mustermann", "Erika Mustermann", "Otto Normalverbraucher"],
+      "kr": ["홍길동"]
     },
 
     "BLOCKCHAIN_ADDRESS": [
