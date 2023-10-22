@@ -169,3 +169,18 @@ def test80_credit_card():
     pii = PiiEntity.build(PiiEnum.BANK_ACCOUNT, "123456", "43", 23,
                           lang="es", country="es")
     assert m(pii) == "43378081052762019721"
+
+
+def test90_location():
+    """
+    Test location value
+    """
+    m = mod.SyntheticValue({"seed": 12345})
+    pii = PiiEntity.build(PiiEnum.LOCATION, "Toledo", "43", 23)
+    assert m(pii) == "Jessica Ville"
+
+    pii = PiiEntity.build(PiiEnum.LOCATION, "Toledo", "43", 23, lang="es")
+    assert m(pii) == "San Eloisa los bajos"
+
+    pii = PiiEntity.build(PiiEnum.LOCATION, "Toledo", "43", 23, lang="de")
+    assert m(pii) == "Frauenkirchen"

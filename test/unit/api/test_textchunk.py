@@ -68,15 +68,20 @@ def test30_process_chunk_rev(monkeypatch):
     piic.load_json(DATADIR / "example-pii-rev.json")
     patch_pii_extract(monkeypatch, piic)
 
+    # Open sample text
     with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
         src = f.read()
 
+    # Create a processor
     m = mod.PiiTextProcessor(default_policy="annotate")
     assert str(m) == "<PiiTextProcessor [annotate]>"
 
+    # Process!
     got = m(src)
 
+    # Open expected result
     with open(DATADIR / "example-trf.txt", encoding="utf-8") as f:
         exp = f.read()
 
+    #print("EXP", exp, "GOT", got, sep="\n")
     assert exp == got

@@ -19,21 +19,39 @@ The package provides three console scripts:
  * `pii-transform` loads a source document & a collection of already-detected
    PII, and produces a transformed document following the required policies.
  * `pii-process` is a full end-to-end script:
-    - load a document, from among the formats supported by `pii-preprocess`
+    - loads a document, from among the formats supported by `pii-preprocess`
 	- detects PII instances, according to `pii-extract` and its installed
 	  plugins
     - transforms the detected PII instances (according to the indicated policy)
 	  and writes out the transformed documennt
  * [`pii-process-jsonl`] is also a full end-to-end script; this one reads
-   JSONL files and processes each line as a separate text buffer (possibly in
+   `[JSONL] files and processes each line as a separate text buffer (possibly in
    different languages), producing a transformed JSONL document
 	  
 	  
+## end-to-end installation
+
 Note that `pii-process` & `pii-process-jsonl` will need additional packages
 to be installed:
- * `pii-preprocess` (only for `pii-process`)
- * `pii-extract-base`, together with any available detection plugins, e.g.
-   `pii-extract-plg-regex` and/or `pii-extract-plg-presidio`
+ * `pii-preprocess` (only when using `pii-process`)
+ * `pii-extract-base`, together with any desired detection plugins, e.g.
+   `pii-extract-plg-regex`, `pii-extract-plg-transformers`,
+   and/or `pii-extract-plg-presidio`
+ * `pii-decide`
+
+This installation can be performed explicitly, choosing the packages & plugins
+to install. There is also an automatic dependency installation, which
+installs a default set of packages, by adding the `[e2e]` qualifier upon
+installation of this package, i.e.:
+
+          pip install pii-transform[e2e]
+
+... and this will install `pii_preprocess`, `pii-extract-base`,
+`pii-extract-plg-regex`, `pii-extract-plg-transformers` and `pii-decide`
+
+Note that you will also need to install Pytorch, so that the models used by
+the `pii-extract-plg-transformers` package can run. See the [transformers
+plugin documentation] for more information,
 
 
 ## API
@@ -42,6 +60,9 @@ The same functionality provided by the command-line scripts can also be
 accessed via a [Python API]
 
 
+
 [transformation policies]: doc/policies.md
 [Python API]: doc/api.md
 [`pii-process-jsonl`]: doc/jsonl.md
+[transformers plugin documentation]: https://github.com/piisa/pii-extract-plg-transformers
+[JSONL]: https://jsonlines.org

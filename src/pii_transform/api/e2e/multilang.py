@@ -21,6 +21,7 @@ try:
     from pii_extract.api.processor import PiiProcessor, PiiCollectionBuilder
     from pii_extract.gather.collection import TYPE_TASKENUM
     from pii_extract import VERSION as PII_EXTRACT_VERSION
+    from pii_decide.api import PiiDecider
     MISSING_MOD = None
 except ImportError as e:
     MISSING_MOD = str(e)
@@ -41,6 +42,7 @@ class MultiPiiTextProcessor:
     def __init__(self, lang: List[str], default_policy: str = None,
                  config: TYPE_CONFIG_LIST = None, country: List[str] = None,
                  tasks: TYPE_TASKENUM = None, keep_piic: bool = False,
+                 decide: bool = True,
                  transform: bool = True, debug: bool = False):
         """
          :param lang: list of languages to be loaded (languages that text buffers
@@ -50,7 +52,8 @@ class MultiPiiTextProcessor:
          :param country: country(es) to restrict task for
          :param tasks: restrict to an specific set of detection tasks
          :param keep_piic: store internally all detected PII
-         :param transform: create a transformer object to substitute
+         :param decide: perform PII decision
+         :param transform: perform PII transformation
          :param debug: activate debug output
         """
         if MISSING_MOD is not None:
@@ -66,7 +69,7 @@ class MultiPiiTextProcessor:
         self._piic = PiiCollectionBuilder()
         self._stats = {
             "chunks": {"total": defaultdict(int), "pii": defaultdict(int)},
-            "time": {'detect': 0, 'transform': 0},
+            "time": {'detect': 0, 'decide': 0, 'transform': 0},
             "num": {},
             "entities": {}
         }
@@ -83,6 +86,12 @@ class MultiPiiTextProcessor:
             self._log(". build-tasks for: %s", lng)
             num += self._proc.build_tasks(lang=lng, country=ctr, pii=tasks)
         self.num_tasks = num
+
+        # Build decider
+        if decide:
+            self._dec = PiiDecider(config=self.config, debug=debug)
+        else:
+            self._dec = None
 
         # Build transformer
         if transform:
@@ -107,22 +116,35 @@ class MultiPiiTextProcessor:
         except (KeyError, TypeError):
             raise ProcException("missing chunk language")
 
+        # Create a new collection and add info aabout all detectors used so far
         piic = PiiCollectionBuilder(lang=lang)
         piic.add_detectors(self._piic.get_detectors(asdict=False).values())
-        s1 = perf_counter()
 
+        # Detect
+        s0 = perf_counter()
         self._proc.detect_chunk(chunk, piic)
-        s2 = perf_counter()
-        self._stats["time"]["detect"] += s2 - s1
+        s1 = perf_counter()
+        self._stats["time"]["detect"] += s1 - s0
+        s0 = s1
 
+        # Decide
+        if self._dec:
+            piic = self._dec.decide_chunk(piic, chunk)
+            s1 = perf_counter()
+            self._stats["time"]["decide"] += s1 - s0
+            s0 = s1
+
+        # Transform
         if self._trf:
             chunk = self._trf.transform_chunk(chunk, piic)
-            self._stats["time"]["transform"] += perf_counter() - s2
+            s1 = perf_counter()
+            self._stats["time"]["transform"] += s1 - s0
 
         self._stats["chunks"]["total"][lang] += 1
         if piic:
             self._stats["chunks"]["pii"][lang] += 1
 
+        # Add data to the general collection (if so requested)
         if self._keep_piic:
             self._piic.add_collection(piic)
         else:
@@ -142,13 +164,14 @@ class MultiPiiTextProcessor:
         self._cid += 1
         input_chunk = DocumentChunk(id=self._cid, data=text,
                                     context={"lang": lang})
-        output_chunk, piic = self.process(input_chunk)
+        output_chunk, _ = self.process(input_chunk)
         return output_chunk.data
 
 
     def piic(self) -> Optional[PiiCollection]:
         """
-        Returns the object with all the detected PII (if it was configured)
+        Returns the object with all the detected PII (if it was configured
+        to keep it)
         """
         return self._piic if self._keep_piic else None
 

@@ -40,6 +40,7 @@ DEFAULT_CACHE_SIZE = 200
 PROVIDER = {
     PiiEnum.EMAIL_ADDRESS: "email",
     PiiEnum.PERSON: "name",
+    PiiEnum.LOCATION: "city",
     PiiEnum.BANK_ACCOUNT: "bban",
     PiiEnum.CREDIT_CARD: "credit_card_number",
     PiiEnum.PHONE_NUMBER: {

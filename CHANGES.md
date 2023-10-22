@@ -1,5 +1,13 @@
 # ChangeLog
 
+# v. 0.6.0
+ * added pii-decide API in e2e processes
+ * added placeholder values for LOCATION
+ * accept output format argument in process_document()
+ * added --out-stats option to multi script
+ * added optional automatic installation with dependencies
+ * added simple (just a city) LOCATION transformation for synthetic policy
+
 ## v. 0.5.1
  * fix: pass the language list to PiiProcessor on object construction
  * update dynamic version checking for pii_extract

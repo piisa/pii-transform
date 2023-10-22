@@ -37,7 +37,7 @@ def patch_pii_extract(monkeypatch,
     # Remove the mark of import fail
     monkeypatch.setattr(mod, "MISSING_MOD", None)
     # Set the processor to be a mock
-    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.5.0")
+    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.6.1")
     monkeypatch.setattr(mod, "PiiProcessor", processor_cls)
     #monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_mock)
     return processor_mock

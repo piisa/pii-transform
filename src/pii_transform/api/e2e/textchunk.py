@@ -17,6 +17,7 @@ try:
     from pii_extract.api.processor import PiiProcessor, PiiCollectionBuilder
     from pii_extract.gather.collection import TYPE_TASKENUM
     from pii_extract import VERSION as PII_EXTRACT_VERSION
+    from pii_decide.api import PiiDecider
     MISSING_MOD = None
 except ImportError as e:
     MISSING_MOD = str(e)
@@ -34,13 +35,15 @@ class PiiTextProcessor:
 
     def __init__(self, lang: str = "en", default_policy: str = None,
                  config: TYPE_CONFIG_LIST = None, country: List[str] = None,
-                 tasks: TYPE_TASKENUM = None, debug: bool = False):
+                 tasks: TYPE_TASKENUM = None, decide: bool = True,
+                 debug: bool = False):
         """
          :param lang: language that all text buffers will be in
          :param default_policy: default transformation policy to use
          :param config: configuration(s) to load, in addition to the defaults
          :param country: country(es) to restrict task for
          :param tasks: restrict to an specific set of detection tasks
+         :param decide: do the decision step
          :param debug: activate debug output
         """
         if MISSING_MOD is not None:
@@ -52,8 +55,9 @@ class PiiTextProcessor:
         self.config = load_config(config or [])
         self.lang = lang
         self.policy = default_policy
-        self.proc = PiiProcessor(config=self.config, languages=lang, debug=debug)
-        self.proc.build_tasks(lang=lang, country=country, pii=tasks)
+        self.det = PiiProcessor(config=self.config, languages=lang, debug=debug)
+        self.det.build_tasks(lang=lang, country=country, pii=tasks)
+        self.dec = PiiDecider(config=config, debug=debug) if decide else None
         self.trf = PiiTransformer(default_policy=default_policy,
                                   config=self.config, debug=debug)
 
@@ -69,7 +73,12 @@ class PiiTextProcessor:
           :return: a tuple (output-chunk, collection-of-detected-pii)
         """
         piic = PiiCollectionBuilder(lang=self.lang)
-        self.proc.detect_chunk(chunk, piic)
+        # Detect
+        self.det.detect_chunk(chunk, piic)
+        # Decide
+        if self.dec:
+            piic = self.dec.decide_chunk(piic, chunk)
+        # Transform
         chunk = self.trf.transform_chunk(chunk, piic)
         return chunk, piic
 

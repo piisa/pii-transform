@@ -40,10 +40,11 @@ instantiated for detectors (it should contain a list of [ISO 639-1] 2-letter
 language codes). It is therefore needed to know beforehand _the list of languages
 the documents in the JSONL file can be in_.
 
-You can see the list of languages with available detectors by using the
-`pii-task-info --list-languages` command (this command-line script is
-part of the `pii-extract-base` package). The default value (if the `--lang`
-option is not specified) is to instantiate just English.
+The default value for the language list (if the `--lang` option is not
+specified) is to instantiate just English. You can use the
+`pii-task-info --list-languages` command to see the list of all languages
+with available detectors (this command-line script is part of the
+`pii-extract-base` package)
 
 There are two cases in which a document in the JSONL file will not be processed:
  1. If the document defines a language that was not specified in the initial
@@ -66,7 +67,8 @@ detectors (e.g. email addresses, credit card numbers).
 ## PII output
 
 The option `--out-piic <filename>` will save the collection of all detected
-PII instances to a JSON file.
+PII instances to either a JSON or JSONL file (depending on the filename
+extension).
 
 
 [ISO 639-1]: https://en.wikipedia.org/wiki/ISO_639-1

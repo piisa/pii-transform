@@ -95,6 +95,8 @@ uninstall: $(VENV)
 
 reinstall: uninstall clean pkg install
 
+install-local: $(VENV)
+	$(VENV)/bin/pip install -e .
 
 # -----------------------------------------------------------------------
 

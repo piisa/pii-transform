@@ -5,8 +5,12 @@ Create pii-transform as a Python package
 import io
 import sys
 import re
+from pathlib import Path
+from collections import defaultdict
 
 from setuptools import setup, find_packages
+
+from typing import Dict, List
 
 from src.pii_transform import VERSION
 
@@ -31,11 +35,24 @@ def requirements(filename="requirements.txt"):
         return [line.strip() for line in f if line and line[0] != "#"]
 
 
-def long_description():
+def requirements_extra(filename: str = 'requirements.txt') -> Dict[str, List[str]]:
+    '''Read the requirements file, separating "extra" requirements'''
+    pathname = Path(__file__).parent / filename
+    req = defaultdict(list)
+    sp = lambda s: s.strip().split(':')
+    fl = lambda s: s[0] and s[0][0] != '#'
+    with open(pathname, 'r') as f:
+        for item in filter(fl, map(sp, f)):
+            req[None if len(item) == 1 else item[0]].append(item[-1])
+    return req
+
+
+def long_description() -> str:
     """
     Take the README and remove markdown hyperlinks
     """
-    with open("README.md", "rt", encoding="utf-8") as f:
+    readme = Path(__file__).parent / "README.md"
+    with open(readme, "rt", encoding="utf-8") as f:
         desc = f.read()
         desc = re.sub(r"^\[ ! \[ [\w\s]+ \] .+ \n", "", desc, flags=re.X | re.M)
         desc = re.sub(r"^\[ ([^\]]+) \]: \s+ \S.*\n", "", desc, flags=re.X | re.M)
@@ -92,6 +109,9 @@ setup_args = dict(
 
 if __name__ == "__main__":
     # Add requirements
-    setup_args["install_requires"] = requirements()
+    reqs = requirements_extra()
+    setup_args['install_requires'] = reqs[None]
+    for k in filter(None, reqs):
+        setup_args['extras_require'][k] = reqs[k]
     # Setup
     setup(**setup_args)

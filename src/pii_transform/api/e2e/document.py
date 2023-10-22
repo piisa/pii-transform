@@ -23,6 +23,7 @@ try:
     from pii_extract.api.file import piic_format, print_stats, print_tasks
     from pii_extract.gather.collection import TYPE_TASKENUM
     from pii_extract import VERSION as PII_EXTRACT_VERSION
+    from pii_decide.api import PiiDecider
     MISSING_MOD = None
 except ImportError as e:
     MISSING_MOD = str(e)
@@ -50,8 +51,8 @@ def format_policy(name: str, param: str = None) -> Dict:
         return name
 
 
-def process_document(infile: str, outfile: str, piifile: str = None,
-                     config: TYPE_CONFIG_LIST = None,
+def process_document(infile: str, outfile: str, outformat: str = None,
+                     piifile: str = None, config: TYPE_CONFIG_LIST = None,
                      lang: str = None, country: List[str] = None,
                      tasks: TYPE_TASKENUM = None, chunk_context: bool = False,
                      default_policy: Union[str, Dict] = None,
@@ -65,6 +66,7 @@ def process_document(infile: str, outfile: str, piifile: str = None,
 
      :param infile: input document filename
      :param outfile: output document filename
+     :param outformat: output file format
      :param piifile: optional output filename to save the detected PII
      :param config: additional configuration
      :param lang: default working language
@@ -113,11 +115,15 @@ def process_document(infile: str, outfile: str, piifile: str = None,
     log(". Building task objects")
     proc.build_tasks(lang, country, pii=tasks)
     if show_tasks:
-        print_tasks(lang, proc, sys.stdout)
+        print_tasks([lang], proc, sys.stdout)
 
     # Process the file to extract PII
     log(". Detecting PII instances")
     piic = proc(doc, chunk_context=chunk_context)
+
+    # Perform decision
+    proc = PiiDecider(config=config, debug=verbose > 1)
+    piic = proc.decide_doc(piic)
 
     # Show statistics
     if show_stats:
@@ -136,4 +142,4 @@ def process_document(infile: str, outfile: str, piifile: str = None,
 
     # Save the transformed document
     log(". Dumping to: %s", outfile)
-    out.dump(outfile)
+    out.dump(outfile, format=outformat)
