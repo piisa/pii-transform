@@ -16,13 +16,24 @@ DATADIR = Path(__file__).parents[2] / "data" / "chunk"
 
 def patch_pii_extract(monkeypatch, piic=None):
     """
-    Patch the pii-extract-base API used by textchunk
+    Patch the API used by textchunk
     """
+    # Patch the pii-extract-base API
     processor_mock = Mock()
     collection_mock = Mock(return_value=piic)
     monkeypatch.setattr(mod, "MISSING_MOD", None)
     monkeypatch.setattr(mod, "PiiProcessor", processor_mock)
     monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_mock)
+    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.6.1")
+
+    def decide(piic, chunk):
+        return piic
+
+    # Set the pii-decide PiiDecider to be a mock
+    decider_mock = Mock()
+    decider_mock.decide_chunk = decide
+    decider_cls = Mock(return_value=decider_mock)
+    monkeypatch.setattr(mod, "PiiDecider", decider_cls)
 
 
 # -----------------------------------------------------------------------

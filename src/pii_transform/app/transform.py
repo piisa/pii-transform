@@ -13,7 +13,7 @@ from pii_data.types.doc import LocalSrcDocumentFile
 from .. import VERSION
 from ..helper.substitution import POLICIES
 from ..api import PiiTransformer
-
+from ..out import DocumentWriter
 
 class Log:
     """
@@ -44,9 +44,12 @@ def process(args: argparse.Namespace):
     pii = PiiCollectionLoader()
     pii.load(args.pii)
 
-    log(". Processing and dumping to:", args.outfile)
-    out = trf(doc, pii)
-    out.dump(args.outfile)
+    log(". Processing")
+    res = trf(doc, pii)
+
+    log(". Dumping to:", args.outfile)
+    out = DocumentWriter(res)
+    out.dump(args.outfile, format=args.output_format)
 
 
 
@@ -66,6 +69,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
                     help="Configuration file for policies and/or placeholder")
     g2.add_argument("--hash-key",
                     help="key value for the hash policy")
+    g2.add_argument("--output-format", "-of", choices=("txt", "yaml", "csv"),
+                    help="output format")
 
     g3 = parser.add_argument_group("Other")
     g3.add_argument("-q", "--quiet", action="store_false", dest="verbose")

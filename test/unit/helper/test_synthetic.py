@@ -30,21 +30,21 @@ def test20_value_person():
 
     # No lang, no country
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23)
-    assert m(pii) == "Adam Bryan"
+    assert m(pii) == "Patricia Sheridan"
 
     # lang, no country
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23, lang="en")
-    assert m(pii) == "Jacob Lee"
+    assert m(pii) == "Sarah Huynh"
 
     # lang, country
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23, lang="en",
                           country="gb")
-    assert m(pii) == "Charlie Wade"
+    assert m(pii) == "Kim Williams-Patel"
 
     # Different language
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23, lang="es",
                           country="ar")
-    assert m(pii) == "Francisca Perez Morales"
+    assert m(pii) == "Thiago Benjamin Morales"
 
     # Different language, country not available
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23, lang="es",
@@ -53,15 +53,15 @@ def test20_value_person():
 
     # Repeat to ensure we get the same (from the cache)
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23)
-    assert m(pii) == "Adam Bryan"
+    assert m(pii) == "Patricia Sheridan"
 
     pii = PiiEntity.build(PiiEnum.PERSON, "John Doe", "43", 23)
-    assert m(pii) == "Kayla Moore-O'Connell"
+    assert m(pii) == "Hunar Chauhan"
 
     # Clear the cache and repeat
     pii = PiiEntity.build(PiiEnum.PERSON, "John Smith", "43", 23)
     m.reset()
-    assert m(pii) == "Jarlath MacMullen"
+    assert m(pii) == "Ian Barrett-Cook"
 
 
 def test30_value_phone():
@@ -72,7 +72,7 @@ def test30_value_phone():
 
     # No lang, no country
     pii = PiiEntity.build(PiiEnum.PHONE_NUMBER, "12345", "43", 23)
-    assert m(pii) == "+63813-453-4962"
+    assert m(pii) == "020 3453496"
 
     # lang, no country
     pii = PiiEntity.build(PiiEnum.PHONE_NUMBER, "123", "43", 23, lang="en")
@@ -96,7 +96,7 @@ def test40_value_email():
 
     # No lang, no country
     pii = PiiEntity.build(PiiEnum.EMAIL_ADDRESS, "me@server.com", "43", 23)
-    assert m(pii) == "asuraprasert@example.org"
+    assert m(pii) == "fwilson@example.net"
 
     # lang, no country
     pii = PiiEntity.build(PiiEnum.EMAIL_ADDRESS, "me@server.com", "43", 23,
@@ -161,14 +161,14 @@ def test80_credit_card():
     """
     m = mod.SyntheticValue({"seed": 1234})
     pii = PiiEntity.build(PiiEnum.BANK_ACCOUNT, "123456", "43", 23)
-    assert m(pii) == "YODA19011530005979"
+    assert m(pii) == "7101901153000597"
 
     pii = PiiEntity.build(PiiEnum.BANK_ACCOUNT, "123456", "43", 23, lang="es")
-    assert m(pii) == "OECF10873187191890481475"
+    assert m(pii) == "TOEC21087318719189048147"
 
     pii = PiiEntity.build(PiiEnum.BANK_ACCOUNT, "123456", "43", 23,
                           lang="es", country="es")
-    assert m(pii) == "43378081052762019721"
+    assert m(pii) == "54337808105276201972"
 
 
 def test90_location():
@@ -177,7 +177,7 @@ def test90_location():
     """
     m = mod.SyntheticValue({"seed": 12345})
     pii = PiiEntity.build(PiiEnum.LOCATION, "Toledo", "43", 23)
-    assert m(pii) == "Jessica Ville"
+    assert m(pii) == "North Sheridaning"
 
     pii = PiiEntity.build(PiiEnum.LOCATION, "Toledo", "43", 23, lang="es")
     assert m(pii) == "San Eloisa los bajos"

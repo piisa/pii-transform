@@ -1,8 +1,9 @@
 """
 Processor for raw text buffers.
 Each buffer can be in a different language.
-"""
 
+Requirements: it needs installation of the e2e requirements
+"""
 from collections import defaultdict
 from time import perf_counter
 
@@ -15,13 +16,15 @@ from pii_data.helper.exception import ProcException
 from pii_data.helper.logger import PiiLogger
 from pii_data.types import PiiCollection, PiiDetector
 from pii_data.types.doc import DocumentChunk
-from pii_transform.api import PiiTransformer
+
+from .. import PiiTransformer
 from . import defs
+
+# Extra PIISA modules we need
 try:
     from pii_extract.api.processor import PiiProcessor, PiiCollectionBuilder
     from pii_extract.gather.collection import TYPE_TASKENUM
     from pii_extract import VERSION as PII_EXTRACT_VERSION
-    from pii_decide.api import PiiDecider
     MISSING_MOD = None
 except ImportError as e:
     MISSING_MOD = str(e)
@@ -29,7 +32,12 @@ except ImportError as e:
     PiiCollectionBuilder = None
     TYPE_TASKENUM = List
     PII_EXTRACT_VERSION = None
-
+try:
+    from pii_decide.api import PiiDecider
+    MISSING_MOD = None
+except ImportError as e:
+    MISSING_MOD = str(e)
+    PiiDecider = None
 
 
 class MultiPiiTextProcessor:
@@ -116,7 +124,7 @@ class MultiPiiTextProcessor:
         except (KeyError, TypeError):
             raise ProcException("missing chunk language")
 
-        # Create a new collection and add info aabout all detectors used so far
+        # Create a new collection and add info about all detectors used so far
         piic = PiiCollectionBuilder(lang=lang)
         piic.add_detectors(self._piic.get_detectors(asdict=False).values())
 
@@ -144,11 +152,14 @@ class MultiPiiTextProcessor:
         if piic:
             self._stats["chunks"]["pii"][lang] += 1
 
-        # Add data to the general collection (if so requested)
+        # Add data to the general collection
         if self._keep_piic:
+            # Add all PII instances
             self._piic.add_collection(piic)
         else:
-            self._piic.add_detectors(piic.get_detectors(asdict=False).values())
+            # Add only the detectors used
+            detectors = piic.get_detectors(asdict=False)
+            self._piic.add_detectors(detectors.values())
 
         return chunk, piic
 

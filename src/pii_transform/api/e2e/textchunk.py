@@ -23,6 +23,7 @@ except ImportError as e:
     MISSING_MOD = str(e)
     PiiProcessor = None
     PiiCollectionBuilder = None
+    PiiDecider = None
     TYPE_TASKENUM = List
     PII_EXTRACT_VERSION = None
 

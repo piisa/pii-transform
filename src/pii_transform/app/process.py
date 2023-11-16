@@ -49,7 +49,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
                     help="policy specific parameter (e.g. hash key, template)")
 
     g3 = parser.add_argument_group("Other")
-    g3.add_argument("--output-format", "-of", choices=("txt", "yaml"),
+    g3.add_argument("--output-format", "-of", choices=("txt", "yaml", "csv"),
                     help="output format")
     g3.add_argument("--verbose","-v", type=int, default=1,
                     help="verbosity level (0-2)")

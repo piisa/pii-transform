@@ -11,12 +11,8 @@ from packaging.version import Version
 from pii_data.helper.io import openfile
 from pii_data.helper.config import load_config, TYPE_CONFIG_LIST
 from pii_data.helper.exception import InvArgException, ProcException
-from ..transform import PiiTransformer
-from . import defs
-try:
-    from pii_data.helper.logger import PiiLogger
-except ImportError:
-    from ...helper.logger import PiiLogger
+from pii_data.helper.logger import PiiLogger
+
 try:
     from pii_preprocess.loader import DocumentLoader
     from pii_extract.api import PiiProcessor
@@ -31,6 +27,10 @@ except ImportError as e:
     PiiProcessor = None
     TYPE_TASKENUM = List
     PII_EXTRACT_VERSION = None
+
+from ..transform import PiiTransformer
+from ...out import DocumentWriter
+from . import defs
 
 
 def format_policy(name: str, param: str = None) -> Dict:
@@ -138,8 +138,9 @@ def process_document(infile: str, outfile: str, outformat: str = None,
 
     # Transform the document
     log(". Transforming PII instances")
-    out = trf(doc, piic)
+    res = trf(doc, piic)
 
     # Save the transformed document
     log(". Dumping to: %s", outfile)
+    out = DocumentWriter(res)
     out.dump(outfile, format=outformat)

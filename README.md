@@ -11,6 +11,9 @@ with a different representation.
 
 The type of substitution done is defined by [transformation policies].
 
+Note: `pii-transform` does **not** implement or use Transformer models for PII
+purposes (for the extraction of PII Instances using Transformer models, see
+[pii-extract-plg-transformers] or [pii-extract-plg-presidio]).
 
 ## Command-line scripts
 
@@ -64,5 +67,7 @@ accessed via a [Python API]
 [transformation policies]: doc/policies.md
 [Python API]: doc/api.md
 [`pii-process-jsonl`]: doc/jsonl.md
+[pii-extract-plg-transformers]: https://github.com/piisa/pii-extract-plg-transformers
+[pii-extract-plg-presidio]: https://github.com/piisa/pii-extract-plg-presidio
 [transformers plugin documentation]: https://github.com/piisa/pii-extract-plg-transformers
 [JSONL]: https://jsonlines.org
