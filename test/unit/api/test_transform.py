@@ -1,5 +1,5 @@
 """
-Test the PiiSubstitutionValue class
+Test the PiiTransform class
 """
 
 from pathlib import Path

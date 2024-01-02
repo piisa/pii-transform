@@ -58,8 +58,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
         description=f"Transform detected PII instances in a document (version {VERSION})")
 
     g0 = parser.add_argument_group("Input/output paths")
-    g0.add_argument("infile", help="source document file")
-    g0.add_argument("pii", help="source detected PII collection")
+    g0.add_argument("infile", help="source document file (YAML)")
+    g0.add_argument("pii", help="detected PII instances (YAML, JSON)")
     g0.add_argument("outfile", help="destination document file")
 
     g2 = parser.add_argument_group("Processing options")

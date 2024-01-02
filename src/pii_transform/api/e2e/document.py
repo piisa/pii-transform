@@ -122,8 +122,8 @@ def process_document(infile: str, outfile: str, outformat: str = None,
     piic = proc(doc, chunk_context=chunk_context)
 
     # Perform decision
-    proc = PiiDecider(config=config, debug=verbose > 1)
-    piic = proc.decide_doc(piic)
+    dec = PiiDecider(config=config, debug=verbose > 1)
+    piic = dec.decide_doc(piic)
 
     # Show statistics
     if show_stats:
