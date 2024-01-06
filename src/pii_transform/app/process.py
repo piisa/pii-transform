@@ -49,6 +49,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
                     help="policy specific parameter (e.g. hash key, template)")
 
     g3 = parser.add_argument_group("Other")
+    g3.add_argument("--output-format", "-of", choices=("txt", "yaml", "csv"),
+                    help="output format")
     g3.add_argument("--verbose","-v", type=int, default=1,
                     help="verbosity level (0-2)")
     g3.add_argument('--reraise', action='store_true',
@@ -74,9 +76,10 @@ def main(args: List[str] = None):
         infile = kw.pop("infile")
         outfile = kw.pop("outfile")
         piifile = kw.pop("save_pii")
+        outformat = kw.pop("output_format")
         defp = format_policy(kw.pop("default_policy"), kw.pop("policy_param"))
-        process_document(infile, outfile, piifile=piifile, default_policy=defp,
-                         **kw)
+        process_document(infile, outfile, outformat=outformat, piifile=piifile,
+                         default_policy=defp, **kw)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         if reraise:

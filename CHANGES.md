@@ -1,5 +1,24 @@
 # ChangeLog
 
+# v. 0.6.0
+ * workflow changes
+     - added pii-decide API in e2e processes
+ * functionality improvements
+    - accept output format argument in process_document()
+    - added --out-stats option to multi script
+    - can save table documents to CSV
+    - `SyntheticValue`:
+       - added `seed` argument (overrides config)
+	   - can read cache_size from config
+ * policy updates
+    - added placeholder values for LOCATION
+    - added simple (just a city) LOCATION transformation for synthetic policy
+ * dependencies update
+     - added optional automatic installation with dependencies
+	 - updated faker dependency
+ * removed old logger module (now in pii-data)
+ * fix: config object given to Placeholder was wrong
+
 ## v. 0.5.1
  * fix: pass the language list to PiiProcessor on object construction
  * update dynamic version checking for pii_extract

@@ -64,6 +64,16 @@
       "kr": ["홍길동"]
     },
 
+    "LOCATION": {
+      "any": ["Ruritania", "Aldovia", "Metropolis", "Gotham City"],
+      "en": {
+	"any": ["Anytown, USA", "Ruritania", "Freedonia", "Drusselstein"],
+	"gb": "Acacia Avenue"
+      },
+      "es": ["Borduria", "Libertonia", "Syldavia"],
+      "fr": ["Syldavie", "Bordurie", "Sondonésie"]
+    },
+
     "BLOCKCHAIN_ADDRESS": [
       "mwXvVQ6vgR78utyPnJrBYqRKJzMGzZiQ1v",
       "n4pUpf65cHFDw8PyDF1LHc1qNdSsibyfCx",

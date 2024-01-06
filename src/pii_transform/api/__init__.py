@@ -1,1 +1,1 @@
-from .transform import PiiTransformer
+from .transform import PiiTransformer   # noqa: F401

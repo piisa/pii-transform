@@ -30,7 +30,8 @@
       "start": 25,
       "end": 44,
       "process": {
-	"action": "ignore"
+	"stage": "decision",
+	"action": "discard"
       }
     },
     {

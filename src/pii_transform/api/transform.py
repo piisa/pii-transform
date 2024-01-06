@@ -5,10 +5,14 @@ from operator import attrgetter
 
 from typing import Dict, Union
 
-from pii_data.types import PiiCollection
+from pii_data.types import PiiCollection, PiiEntity
 from pii_data.types.doc import SrcDocument, DocumentChunk, LocalSrcDocument
 from pii_data.types.piicollection import PiiChunkIterator
 from pii_data.helper.config import load_config
+try:
+    from pii_decide.defs import ACT_DISCARD
+except ImportError:
+    ACT_DISCARD = "discard"
 
 from ..helper import PiiSubstitutionValue
 from .. import defs
@@ -16,6 +20,16 @@ from .. import defs
 # Reset all assigment caches for each new document
 DEFAULT_RESET = "document"
 
+
+def discard_pii(pii: PiiEntity) -> bool:
+    """
+    Check if a Pii instance has been marked for removal
+    """
+    prc = pii.fields.get("process")
+    if not prc or prc.get("stage") != "decision":
+        return False
+    action = prc.get("action")
+    return action == ACT_DISCARD
 
 # --------------------------------------------------------------------------
 
@@ -54,8 +68,7 @@ class PiiTransformer:
         output = []
         pos = 0
         for pii in sorted(piic, key=attrgetter("pos")):
-            action = pii.fields.get("process", {}).get("action", "transform")
-            if action == "ignore":
+            if discard_pii(pii):
                 continue
             output += [chunk.data[pos:pii.pos], self.subst(pii)]
             pos = pii.pos + len(pii)

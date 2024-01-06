@@ -20,7 +20,7 @@ from collections import defaultdict
 from typing import Union, List, Tuple, Dict
 
 from pii_data.types import PiiEntity
-from pii_data.helper.config import load_single_config
+from pii_data.helper.config import load_single_config, TYPE_CONFIG_LIST
 from pii_data.helper.exception import FileException
 
 from .. import defs
@@ -34,16 +34,16 @@ PH_FILENAME = "placeholder.json"
 
 class PlaceholderValue:
 
-    def __init__(self, config: Union[Dict, str] = None, cache_size: int = None):
+    def __init__(self, config: TYPE_CONFIG_LIST = None, cache_size: int = None):
         """
-         :param config: configuration to use
+         :param config: a generic PIISA configuration object, or list of them
          :param cache_size: size of the LRU cache used to maintain consistency
            in assignments
         """
         # Get the placeholder default config
         base = Path(__file__).parents[1] / "resources" / PH_FILENAME
 
-        # Load the defualt config, and add to it the passed one
+        # Load the default config, and add to it the passed one
         config = load_single_config(base, defs.FMT_CONFIG_PLACEHOLDER, config)
 
         # Get the placeholder values

@@ -68,7 +68,8 @@ def policy_target(target: Union[str, PiiEnum]) -> str:
     try:
         return PiiEnum[target].name
     except KeyError:
-        raise InvArgException('invalid policy target: {}', target)
+        raise InvArgException('invalid policy target: PiiEnum not found: {}',
+                              target)
 
 
 class DefaultEmpty(dict):
@@ -82,7 +83,7 @@ class DefaultEmpty(dict):
 class PiiSubstitutionValue:
 
     def __init__(self, default_policy: Union[str, Dict] = None,
-                 config: Dict = None):
+                 config: Dict = None, seed: int = None):
         """
          :param default_policy: a default policy to apply to all entities that
             do not have a specific policy in the configuration
@@ -93,7 +94,7 @@ class PiiSubstitutionValue:
         cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM) or {}
 
         # Set the random seed, if needed
-        self.seed = cfg.get("seed") if config else None
+        self.seed = seed if seed is not None else cfg.get("seed")
         if self.seed:
             random.seed(self.seed)
 
@@ -131,13 +132,12 @@ class PiiSubstitutionValue:
         # Return the transformation for this policy
         if pname == "placeholder":
             if pname not in self._cache:
-                cfg = self._config.get(defs.FMT_CONFIG_PLACEHOLDER)
-                self._cache[pname] = PlaceholderValue(cfg)
+                self._cache[pname] = PlaceholderValue(self._config)
             return self._cache[pname]
         elif pname == "synthetic":
             if pname not in self._cache:
                 cfg = self._config.get(defs.FMT_CONFIG_TRANSFORM)
-                self._cache[pname] = SyntheticValue(cfg)
+                self._cache[pname] = SyntheticValue(cfg, seed=self.seed)
             return self._cache[pname]
         elif pname == "hash":
             try:

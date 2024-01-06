@@ -40,6 +40,7 @@ DEFAULT_CACHE_SIZE = 200
 PROVIDER = {
     PiiEnum.EMAIL_ADDRESS: "email",
     PiiEnum.PERSON: "name",
+    PiiEnum.LOCATION: "city",
     PiiEnum.BANK_ACCOUNT: "bban",
     PiiEnum.CREDIT_CARD: "credit_card_number",
     PiiEnum.PHONE_NUMBER: {
@@ -78,12 +79,16 @@ PROVIDER = {
 
 class SyntheticValue:
 
-    def __init__(self, config: Dict = None, cache_size: int = None):
+    def __init__(self, config: Dict = None, seed: int = None,
+                 cache_size: int = None):
         """
-         :param config: configuration to use
+         :param config: configuration to use for this module
+         :param seed: set random seed
          :param cache_size: size of the LRU cache used to maintain consistency
            in assignments
         """
+        if config is None:
+            config = {}
         self.faker = {}
         self._countries = defaultdict(list)
         self._locales = set(AVAILABLE_LOCALES)
@@ -95,12 +100,12 @@ class SyntheticValue:
 
         # Prepare the cache
         if cache_size is None:
-            cache_size = DEFAULT_CACHE_SIZE
+            cache_size = config.get("cache_size", DEFAULT_CACHE_SIZE)
         self._cache = lru_cache(maxsize=cache_size)(self._fetch_value)
 
         # Set the random seed, if needed
-        self.seed = config.get("seed") if config else None
-        if self.seed:
+        self.seed = seed if seed is not None else config.get("seed")
+        if self.seed is not None:
             Faker.seed(self.seed)
             random.seed(self.seed)
 

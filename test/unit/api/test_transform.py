@@ -1,5 +1,5 @@
 """
-Test the PiiSubstitutionValue class
+Test the PiiTransform class
 """
 
 from pathlib import Path
@@ -19,7 +19,7 @@ import pii_transform.api.transform as mod
 DATADIR = Path(__file__).parents[2] / "data"
 
 
-def save_load(doc: BaseLocalSrcDocument) -> Dict:
+def save_load_yaml(doc: BaseLocalSrcDocument) -> Dict:
     try:
         f = tempfile.NamedTemporaryFile(mode="wt", suffix=".yml", delete=False)
         doc.dump(f, format="yml")
@@ -49,7 +49,7 @@ def test20_process_seq():
     m = mod.PiiTransformer()
     result = m(doc, pii)
 
-    got = save_load(result)
+    got = save_load_yaml(result)
     exp = load_yaml(DATADIR / "minidoc-example-seq-repl.yaml")
     assert exp == got
 
@@ -63,7 +63,7 @@ def test30_process_tree():
     m = mod.PiiTransformer()
     result = m(doc, pii)
 
-    got = save_load(result)
+    got = save_load_yaml(result)
     exp = load_yaml(DATADIR / "minidoc-example-tree-repl.yaml")
     assert exp == got
 
@@ -77,7 +77,7 @@ def test40_process_table():
     m = mod.PiiTransformer()
     result = m(doc, pii)
 
-    got = save_load(result)
+    got = save_load_yaml(result)
     exp = load_yaml(DATADIR / "minidoc-example-table-repl.yaml")
     assert exp == got
 
@@ -94,6 +94,6 @@ def test50_process_seq_ignore():
     m = mod.PiiTransformer()
     result = m(doc, pii)
 
-    got = save_load(result)
+    got = save_load_yaml(result)
     exp = load_yaml(DATADIR / "minidoc-example-seq-ignore-repl.yaml")
     assert exp == got

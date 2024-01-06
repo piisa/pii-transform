@@ -9,7 +9,7 @@ from pii_data.types.piicollection.loader import PiiCollectionLoader
 from pii_data.types.piicollection import PiiDetector
 from pii_data.helper.exception import ProcException
 
-import pii_extract.api.processor as processor
+from pii_extract.api import processor
 
 import pii_transform.api.e2e.multilang as mod
 
@@ -19,27 +19,43 @@ import pytest
 DATADIR = Path(__file__).parents[2] / "data" / "chunk"
 
 
-def patch_pii_extract(monkeypatch,
-                      piic_result: processor.PiiCollectionBuilder = None):
+def patch_multilang(monkeypatch, piic_result=None):
     """
     Patch the pii-extract-base API used by textchunk
     """
 
+    # Remove the mark of import fail
+    monkeypatch.setattr(mod, "MISSING_MOD", None)
+
+    # Patch the pii-extract-base API
+    processor_mock = Mock()
+    processor_mock.build_tasks = Mock(return_value=2)
+    processor_mock.get_stats = Mock(return_value={})
+    processor_cls = Mock(return_value=processor_mock)
+
+
     def detect(chunk, piic):
         piic.add_collection(piic_result)
 
-    processor_mock = Mock()
-    processor_mock.build_tasks = Mock(return_value=2)
-    processor_mock.detect_chunk = detect
-    processor_mock.get_stats = Mock(return_value={})
-    processor_cls = Mock(return_value=processor_mock)
-    #collection_mock = Mock(return_value=piic)
-    # Remove the mark of import fail
-    monkeypatch.setattr(mod, "MISSING_MOD", None)
-    # Set the processor to be a mock
-    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.5.0")
+    #processor_mock.detect_chunk = detect
+
+    monkeypatch.setattr(mod, "PII_EXTRACT_VERSION", "0.6.1")
     monkeypatch.setattr(mod, "PiiProcessor", processor_cls)
-    #monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_mock)
+
+    #collection_mock = Mock(return_value=piic_result)
+    #collection_mock.get_detectors = Mock(return_value={"name": "value"})
+    #collection_cls = Mock(return_value=collection_mock)
+    #monkeypatch.setattr(mod, "PiiCollectionBuilder", collection_cls)
+
+    def decide(piic, chunk):
+        return piic_result
+
+    # Set the pii-decide PiiDecider to be a mock
+    decider_mock = Mock()
+    decider_mock.decide_chunk = decide
+    decider_cls = Mock(return_value=decider_mock)
+    monkeypatch.setattr(mod, "PiiDecider", decider_cls)
+
     return processor_mock
 
 
@@ -50,7 +66,7 @@ def test10_constructor(monkeypatch):
     """
     Test constructing the object
     """
-    mock = patch_pii_extract(monkeypatch)
+    mock = patch_multilang(monkeypatch)
 
     m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="label")
     assert str(m) == "<MultiPiiTextProcessor [#2/4 label]>"
@@ -62,7 +78,7 @@ def test11_constructor_error(monkeypatch):
     """
     Test constructing the object, error
     """
-    patch_pii_extract(monkeypatch)
+    patch_multilang(monkeypatch)
 
     with pytest.raises(TypeError):
         mod.MultiPiiTextProcessor()
@@ -75,7 +91,7 @@ def test20_process_chunk(monkeypatch):
     # Prepare the data that will be reported by the extractor
     piic1 = PiiCollectionLoader()
     piic1.load_json(DATADIR / "example-pii.json")
-    patch_pii_extract(monkeypatch, piic1)
+    patch_multilang(monkeypatch, piic1)
 
     with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
         src = f.read()
@@ -100,7 +116,7 @@ def test30_process_chunk_rev(monkeypatch):
     """
     piic = PiiCollectionLoader()
     piic.load_json(DATADIR / "example-pii-rev.json")
-    patch_pii_extract(monkeypatch, piic)
+    patch_multilang(monkeypatch, piic)
 
     with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
         src = f.read()
@@ -121,7 +137,7 @@ def test50_process_chunk_err(monkeypatch):
     """
     piic = PiiCollectionLoader()
     piic.load_json(DATADIR / "example-pii.json")
-    patch_pii_extract(monkeypatch, piic)
+    patch_multilang(monkeypatch, piic)
 
     with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
         src = f.read()
@@ -146,7 +162,7 @@ def test60_process_piic(monkeypatch):
     # the result of the extraction process
     piic2 = processor.PiiCollectionBuilder()
     piic2.add_collection(piic1)
-    patch_pii_extract(monkeypatch, piic2)
+    patch_multilang(monkeypatch, piic2)
 
 
     m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="annotate",
@@ -168,7 +184,7 @@ def test61_process_piic_nolang(monkeypatch):
     piic1.load_json(DATADIR / "example-pii.json")
     piic2 = processor.PiiCollectionBuilder()
     piic2.add_collection(piic1)
-    patch_pii_extract(monkeypatch, piic2)
+    patch_multilang(monkeypatch, piic2)
 
     with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
         src = f.read()
@@ -195,7 +211,7 @@ def test70_process_detectors(monkeypatch):
     # the result of the extraction process
     piic2 = processor.PiiCollectionBuilder()
     piic2.add_collection(piic1)
-    patch_pii_extract(monkeypatch, piic2)
+    patch_multilang(monkeypatch, piic2)
 
 
     m = mod.MultiPiiTextProcessor(["en", "es"], default_policy="annotate",
@@ -216,7 +232,7 @@ def test80_process_stats(monkeypatch):
     """
     piic = PiiCollectionLoader()
     piic.load_json(DATADIR / "example-pii.json")
-    proc = patch_pii_extract(monkeypatch, piic)
+    proc = patch_multilang(monkeypatch, piic)
 
     with open(DATADIR / "example-src.txt", encoding="utf-8") as f:
         src = f.read()

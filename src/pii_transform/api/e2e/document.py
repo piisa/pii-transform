@@ -11,18 +11,15 @@ from packaging.version import Version
 from pii_data.helper.io import openfile
 from pii_data.helper.config import load_config, TYPE_CONFIG_LIST
 from pii_data.helper.exception import InvArgException, ProcException
-from ..transform import PiiTransformer
-from . import defs
-try:
-    from pii_data.helper.logger import PiiLogger
-except ImportError:
-    from ...helper.logger import PiiLogger
+from pii_data.helper.logger import PiiLogger
+
 try:
     from pii_preprocess.loader import DocumentLoader
     from pii_extract.api import PiiProcessor
     from pii_extract.api.file import piic_format, print_stats, print_tasks
     from pii_extract.gather.collection import TYPE_TASKENUM
     from pii_extract import VERSION as PII_EXTRACT_VERSION
+    from pii_decide.api import PiiDecider
     MISSING_MOD = None
 except ImportError as e:
     MISSING_MOD = str(e)
@@ -30,6 +27,10 @@ except ImportError as e:
     PiiProcessor = None
     TYPE_TASKENUM = List
     PII_EXTRACT_VERSION = None
+
+from ..transform import PiiTransformer
+from ...out import DocumentWriter
+from . import defs
 
 
 def format_policy(name: str, param: str = None) -> Dict:
@@ -50,8 +51,8 @@ def format_policy(name: str, param: str = None) -> Dict:
         return name
 
 
-def process_document(infile: str, outfile: str, piifile: str = None,
-                     config: TYPE_CONFIG_LIST = None,
+def process_document(infile: str, outfile: str, outformat: str = None,
+                     piifile: str = None, config: TYPE_CONFIG_LIST = None,
                      lang: str = None, country: List[str] = None,
                      tasks: TYPE_TASKENUM = None, chunk_context: bool = False,
                      default_policy: Union[str, Dict] = None,
@@ -65,6 +66,7 @@ def process_document(infile: str, outfile: str, piifile: str = None,
 
      :param infile: input document filename
      :param outfile: output document filename
+     :param outformat: output file format
      :param piifile: optional output filename to save the detected PII
      :param config: additional configuration
      :param lang: default working language
@@ -113,11 +115,15 @@ def process_document(infile: str, outfile: str, piifile: str = None,
     log(". Building task objects")
     proc.build_tasks(lang, country, pii=tasks)
     if show_tasks:
-        print_tasks(lang, proc, sys.stdout)
+        print_tasks([lang], proc, sys.stdout)
 
     # Process the file to extract PII
     log(". Detecting PII instances")
     piic = proc(doc, chunk_context=chunk_context)
+
+    # Perform decision
+    dec = PiiDecider(config=config, debug=verbose > 1)
+    piic = dec.decide_doc(piic)
 
     # Show statistics
     if show_stats:
@@ -132,8 +138,9 @@ def process_document(infile: str, outfile: str, piifile: str = None,
 
     # Transform the document
     log(". Transforming PII instances")
-    out = trf(doc, piic)
+    res = trf(doc, piic)
 
     # Save the transformed document
     log(". Dumping to: %s", outfile)
-    out.dump(outfile)
+    out = DocumentWriter(res)
+    out.dump(outfile, format=outformat)
