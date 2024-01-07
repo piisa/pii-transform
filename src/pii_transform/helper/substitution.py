@@ -80,6 +80,9 @@ class DefaultEmpty(dict):
         return ""
 
 
+# -------------------------------------------------------------------------
+
+
 class PiiSubstitutionValue:
 
     def __init__(self, default_policy: Union[str, Dict] = None,

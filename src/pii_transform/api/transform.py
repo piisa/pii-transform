@@ -5,10 +5,11 @@ from operator import attrgetter
 
 from typing import Dict, Union
 
+from pii_data.helper.config import load_config
+from pii_data.helper.exception import InvArgException
 from pii_data.types import PiiCollection, PiiEntity
 from pii_data.types.doc import SrcDocument, DocumentChunk, LocalSrcDocument
 from pii_data.types.piicollection import PiiChunkIterator
-from pii_data.helper.config import load_config
 try:
     from pii_decide.defs import ACT_DISCARD
 except ImportError:
@@ -19,6 +20,25 @@ from .. import defs
 
 # Reset all assigment caches for each new document
 DEFAULT_RESET = "document"
+
+
+def format_policy(name: str, param: str = None) -> Dict:
+    """
+    Format a policy, with possibly parameters, as a dictionary to pass to
+    the API
+      :param name: policy name
+      :param param: policy parameter, for policies that require it
+    """
+    if name == "hash":
+        if param is None:
+            raise InvArgException("hash policy needs a key")
+        return {"name": "hash", "key": param}
+    elif name == "custom":
+        if param is None:
+            raise InvArgException("custom policy needs a template")
+        return {"name": "custom", "template": param}
+    else:
+        return name
 
 
 def discard_pii(pii: PiiEntity) -> bool:
