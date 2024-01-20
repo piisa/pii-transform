@@ -67,10 +67,10 @@ class PiiTransformer:
         self._debug = debug
         all_config = load_config(config, [defs.FMT_CONFIG_TRANSFORM,
                                           defs.FMT_CONFIG_PLACEHOLDER])
-        config = all_config.get(defs.FMT_CONFIG_TRANSFORM) or {}
-        self._reset = config.get("reset", DEFAULT_RESET)
+        trf_config = all_config.get(defs.FMT_CONFIG_TRANSFORM) or {}
+        self._reset = trf_config.get("reset", DEFAULT_RESET)
         if default_policy is None:
-            default_policy = config.get("default_policy")
+            default_policy = trf_config.get("default_policy")
         self.subst = PiiSubstitutionValue(default_policy, all_config)
 
 

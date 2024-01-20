@@ -1,8 +1,9 @@
-# Provided APIs
+# Provided API
 
 This package provides the transform API for document transformation.
 
-The former end-to-end processing APIs are now in the [pii-process] package.
+*Note: the end-to-end processing APIs formerly here are now located in the
+[pii-process] package.*
 
 
 ## Transform API
@@ -20,9 +21,9 @@ from pii_transform.api import PiiTransformer
 # Load a document
 doc = LocalSrcDocumentFile(filename)
 
-# Load the PII detected in the document
+# Load the PII that were detected in the document from a dump file
 pii = PiiCollectionLoader()
-pii.load(piiname)
+pii.load(pii_filename)
 
 # Start a transformer object
 trf = PiiTransformer(default_policy="label")
@@ -30,12 +31,18 @@ trf = PiiTransformer(default_policy="label")
 # Transform
 outdoc = trf(doc, pii)
 
-# Save to disk
+# Save the document to disk
 outdoc.dump(outname)
 ```
 
 The `pii-transform` command-line script performs the same processing.
 
+Note that the module supports only documents in the [PIISA Source Document
+format], which contains the document written as a YAML file. To process and
+generate documents in other formats, use the [pii-process] package, which
+wraps around this one.
+
 
 [policy]: policies.md
 [pii-process]: https://github.com/piisa/pii-process
+[PIISA Source Document format]: https://github.com/piisa/pii-data/blob/main/doc/srcdocument.md#file-format

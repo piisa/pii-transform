@@ -5,12 +5,27 @@ instances:
  * **passthrough**: the value of the PII instance is left as is
  * **redact**: all pii instances are replaced by a `<PII>` generic string
  * **label**: a PII instance is replaced by its PII _type_, e.g. `<EMAIL_ADDRESS>`
- * **placeholder**: replace with a prototypical value, see below
- * **hash**: replace by a hash made from the entity value plus a key
- * **synthetic**: substitute by synthetic data
- * **annotate**: replace the PII instance by a `<TYPE:VALUE>` string, i.e. include
-   _both_ the PII type and its value
- * **custom**: perform replacement according to a template, see below
+ * **annotate**: replace the PII instance by a `<TYPE:VALUE>` string, i.e.
+   include _both_ the PII type and its value
+ * **custom**: perform replacement according to a template, [_see below_](#custom)
+ * **hash**: replace by a hash made from the entity value plus a key, [_see below_](#hash)
+ * **placeholder**: replace with a prototypical value, [_see below_](#placeholder)
+ * **synthetic**: substitute by synthetic data, [_see below_](#synthetic)
+
+
+# Information on specific policies
+
+## custom
+
+This policy needs an additional `template` parameter, which contains a string
+that will act as a template to render the replacement.
+
+The template can contain fields of the PII Instance, enclosed in braces. For
+instance, a template:
+
+     {type}={value} country={country}
+
+will generate substitutions such as `GOV_ID=2123131331212 country=us`
 
 
 ## hash
@@ -35,17 +50,19 @@ external shape of the PII type, but its contents are clearly _not_ a valid
 value. For instance, `0000 0000 0000 0000` for a credit card, or
 `redacted.email@hotmail.com` for an email address.
 
-The policy has two optional parameters:
- * `placeholder_file` indicates the file that contains the substitution 
-   values for each PII
- * `size` defines the size of the consistency cache: when assigning a
-   placeholder value, if there is a list of them available, the module will
-   rotate values from the list, in a circular fashion. The last "size"
-   assignments are remembered, so if a PII instance is repeated, it will get
-   the _same_ assignment
+These substitutions are gathered from a placeholder config file. When
+assigning a placeholder value, if there is a list of them available, the
+module will rotate values from the list, in a circular fashion.
+
+The policy also contains a consistency cache (of configurable size). This is
+used to remember the last assignments, so if a PII instance is repeated, it will
+get the _same_ assignment.
+
+The cache can be cleared at the end of each document or each chunk, depending
+on configuration.
 
 
-### Placeholder file
+### Placeholder config file
 
 The placeholder file is a JSON file that contains an entry for each PII type.
 Under that entry there can be further subdivisions by `language` and 
@@ -57,8 +74,9 @@ repeated) or a list of strings, which are serially assigned, as mentioned
 above. If a PII type has no entry in the placeholder file, the `label` policy
 will be used.
 
-If no placeholder file is indicated in the policy, the module uses a [default
-placeholder file].
+If no placeholder file is indicated in the policy, the module uses only the
+[default placeholder file].
+
 
 ## synthetic
 
@@ -66,18 +84,16 @@ This policy creates synthetic values using the [Faker] package. It will try to
 adjust the characteristics of the created value to the PII language and
 country, if possible.
 
+It has a number of mappings to PII Instances to the adequate Faker
+provider. If there is no defined provider for a given PII, the package will
+use the default policy on it instead.
 
-## custom
+The same as the [placeholder](#placeholder) policy, this policy also contains a
+consistency cache (of configurable size). This is used to remember the last
+assignments, so if a PII instance is repeated, it will get the _same_ assignment.
 
-This policy needs an additional `template` parameter, which contains a string
-that will act as a template to render the replacement.
-
-The template can contain fields of the PII Instance, enclosed in braces. For
-instance, a template:
-
-     {type}={value} country={country}
-	 
-will generate substitutions such as `GOV_ID=2123131331212 country=us`
+The cache can be cleared at the end of each document or each chunk, depending
+on configuration.
 
 
 [default placeholder file]: ../src/pii_transform/resources/placeholder.json

@@ -13,26 +13,16 @@ with a different representation.
 The type of substitution done is defined by [transformation policies].
 
 Note: `pii-transform` does **not** implement or use Transformer models for PII
-purposes (for the extraction of PII Instances using Transformer models, see
+purposes (for the extraction of PII instances using Transformer models, see
 [pii-extract-plg-transformers] or [pii-extract-plg-presidio]).
+
 
 ## Command-line script
 
 The package provides a console script: `pii-transform` loads a source document
-& a collection of already-detected
+& a collection of already-detected PII, and produces a transformed document
+following the specified policies.
 
-
-   PII, and produces a transformed document following the required policies.
- * `pii-process` is a full end-to-end script:
-    - loads a document, from among the formats supported by `pii-preprocess`
-	- detects PII instances, according to `pii-extract` and its installed
-	  plugins
-    - transforms the detected PII instances (according to the indicated policy)
-	  and writes out the transformed documennt
- * [`pii-process-jsonl`] is also a full end-to-end script; this one reads
-   `[JSONL] files and processes each line as a separate text buffer (possibly in
-   different languages), producing a transformed JSONL document
-	  
 
 ## API
 
@@ -43,7 +33,9 @@ accessed via a [Python API]
 ## End-to-end workflow
 
 The end-to-end scripts and APIs have been migrated; they are now in the
-[`pii-process`] package
+[`pii-process`] package. That one is also the module to use to process generic
+documents, since this package supports only the [PIISA Source Document
+format], which contains the document written as a YAML file.
 
 
 
@@ -52,3 +44,4 @@ The end-to-end scripts and APIs have been migrated; they are now in the
 [`pii-process`]: https://github.com/piisa/pii-process
 [pii-extract-plg-transformers]: https://github.com/piisa/pii-extract-plg-transformers
 [pii-extract-plg-presidio]: https://github.com/piisa/pii-extract-plg-presidio
+[PIISA Source Document format]: https://github.com/piisa/pii-data/blob/main/doc/srcdocument.md#file-format
