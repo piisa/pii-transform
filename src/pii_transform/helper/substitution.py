@@ -80,6 +80,9 @@ class DefaultEmpty(dict):
         return ""
 
 
+# -------------------------------------------------------------------------
+
+
 class PiiSubstitutionValue:
 
     def __init__(self, default_policy: Union[str, Dict] = None,
@@ -88,6 +91,7 @@ class PiiSubstitutionValue:
          :param default_policy: a default policy to apply to all entities that
             do not have a specific policy in the configuration
          :param config: configuration to apply
+         :param seed: random seed to use
         """
         self._cache = {}
         self._config = config or {}

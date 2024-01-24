@@ -51,7 +51,8 @@ def test20_value(init_random):
     """
     Test fixed assignment
     """
-    m = mod.PlaceholderValue(config=datafile("placeholder-test.json"))
+    config = load_config(datafile("placeholder-test.json"))
+    m = mod.PlaceholderValue(config)
     pii = PiiEntity.build(PiiEnum.BLOCKCHAIN_ADDRESS, "1234", "43", 23)
     assert m(pii) == "mjiR1YStPWaXPnGYaCusuk39zEYkdanqcu"
 
@@ -63,7 +64,8 @@ def test30_value_rotation():
     """
     Test rotated assignment
     """
-    m = mod.PlaceholderValue(config=datafile("placeholder-test.json"))
+    config = load_config(datafile("placeholder-test.json"))
+    m = mod.PlaceholderValue(config)
 
     pii = PiiEntity.build(PiiEnum.CREDIT_CARD, "1234 5678", "43", 23)
     assert m(pii) == "0000 0000 0000 0000"
@@ -93,7 +95,8 @@ def test40_value_subdict():
     """
     Test subdict selection
     """
-    m = mod.PlaceholderValue(config=datafile("placeholder-test.json"))
+    config = load_config(datafile("placeholder-test.json"))
+    m = mod.PlaceholderValue(config)
 
     pii = PiiEntity.build(PiiEnum.PERSON, "Henry James", "43", 23)
     assert m(pii) == "PERSON"

@@ -20,7 +20,7 @@ from collections import defaultdict
 from typing import Union, List, Tuple, Dict
 
 from pii_data.types import PiiEntity
-from pii_data.helper.config import load_single_config, TYPE_CONFIG_LIST
+from pii_data.helper.config import load_config, load_single_config, TYPE_CONFIG_LIST
 from pii_data.helper.exception import FileException
 
 from .. import defs
@@ -34,33 +34,49 @@ PH_FILENAME = "placeholder.json"
 
 class PlaceholderValue:
 
-    def __init__(self, config: TYPE_CONFIG_LIST = None, cache_size: int = None):
+    def __init__(self, config: Dict = None, cache_size: int = None):
         """
-         :param config: a generic PIISA configuration object, or list of them
+         :param config: a generic PIISA configuration object
          :param cache_size: size of the LRU cache used to maintain consistency
            in assignments
         """
-        # Get the placeholder default config
-        base = Path(__file__).parents[1] / "resources" / PH_FILENAME
-
-        # Load the default config, and add to it the passed one
-        config = load_single_config(base, defs.FMT_CONFIG_PLACEHOLDER, config)
-
-        # Get the placeholder values
-        try:
-            self._values = config["placeholder_values"]
-        except KeyError as e:
-            raise FileException("cannot fetch placeholder info from config") from e
+        if config is None:
+            config = {}
+        elif isinstance(config, (Path, str)):
+            config = load_config(config)        # backwards compatibility
 
         # Prepare the cache
         if cache_size is None:
-            cache_size = DEFAULT_CACHE_SIZE
+            trf_config = config.get(defs.FMT_CONFIG_TRANSFORM, {})
+            cache_size = trf_config.get("cache_size", DEFAULT_CACHE_SIZE)
         self._cache = lru_cache(maxsize=cache_size)(self._rotate_value)
+
+        # Dictionary to keep the indices of the last assigned value
         self._index = defaultdict(int)
+
+        # Get the location for the placeholder default config
+        base = Path(__file__).parents[1] / "resources" / PH_FILENAME
+
+        # Load the default placeholder config, and add to it the passed one
+        ph_config = load_single_config(base, defs.FMT_CONFIG_PLACEHOLDER,
+                                       configlist=config)
+
+        # Get the placeholder values
+        try:
+            self._values = ph_config["placeholder_values"]
+        except KeyError as e:
+            raise FileException("cannot fetch placeholder info from config") from e
 
 
     def __repr__(self) -> str:
         return f"<PlaceholderValue: #{len(self._values)}>"
+
+
+    def reset(self):
+        """
+        Remove all elements in the cache
+        """
+        self._cache.cache_clear()
 
 
     def _select_value(self, pii: PiiEntity) -> Union[str, List[str]]:

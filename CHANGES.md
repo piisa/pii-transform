@@ -1,5 +1,8 @@
 # ChangeLog
 
+# v. 0.7.0
+ * end-to-end API removed (it's now in pii-process)
+
 # v. 0.6.0
  * workflow changes
      - added pii-decide API in e2e processes

@@ -1,1 +1,1 @@
-from .transform import PiiTransformer   # noqa: F401
+from .transform import PiiTransformer, format_policy   # noqa: F401

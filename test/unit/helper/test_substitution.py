@@ -257,7 +257,7 @@ def test210_reset():
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
         assert m(pii) == exp
 
-    # Repeat. The previois values are cached, so we get the same
+    # Repeat. The previous values are cached, so we get the same
     for pii, exp in uc:
         pii = PiiEntity.build(pii, "1234 5678", "43", 23, lang="en")
         assert m(pii) == exp
@@ -266,7 +266,7 @@ def test210_reset():
     m.reset()
 
     uc = (
-        (PiiEnum.CREDIT_CARD, "9999 9999 9999 9999"),
+        (PiiEnum.CREDIT_CARD, "0000 0000 0000 0000"),
         (PiiEnum.BLOCKCHAIN_ADDRESS, "<BLOCKCHAIN_ADDRESS>"),
         (PiiEnum.PERSON, "Teresa Aguilar")
     )
